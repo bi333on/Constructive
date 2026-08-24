@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { Inline } from "@/editor/inline";
 import { bool, col, num, str } from "../types";
 import { BlockButton, BlockImage, Container, Section, type BlockRenderProps } from "./common";
 
@@ -13,16 +14,20 @@ export function HeaderBlock({ props, interactive }: BlockRenderProps) {
       }}
     >
       <Container className="flex items-center justify-between gap-3 py-4">
-        <span className="min-w-0 truncate text-lg font-bold">{str(props, "logo", "Логотип")}</span>
+        <Inline as="span" fieldKeys={["logo"]} className="min-w-0 truncate text-lg font-bold">
+          {str(props, "logo", "Логотип")}
+        </Inline>
         {showButton && (
-          <BlockButton
-            bg={col(props, "buttonColor", "#2563eb")}
-            fg={col(props, "buttonTextColor", "#ffffff")}
-            href={str(props, "buttonUrl")}
-            interactive={interactive}
-          >
-            {str(props, "buttonText", "Начать")}
-          </BlockButton>
+          <Inline fieldKeys={["buttonText", "buttonUrl", "buttonColor", "buttonTextColor"]}>
+            <BlockButton
+              bg={col(props, "buttonColor", "#2563eb")}
+              fg={col(props, "buttonTextColor", "#ffffff")}
+              href={str(props, "buttonUrl")}
+              interactive={interactive}
+            >
+              {str(props, "buttonText", "Начать")}
+            </BlockButton>
+          </Inline>
         )}
       </Container>
     </header>
@@ -55,12 +60,21 @@ export function HeroBlock({ props, interactive }: BlockRenderProps) {
         )}
       >
         {str(props, "eyebrow") && (
-          <div className="mb-3 text-sm font-semibold uppercase tracking-widest" style={{ color: accent }}>
+          <Inline
+            as="div"
+            fieldKeys={["eyebrow"]}
+            className="mb-3 text-sm font-semibold uppercase tracking-widest"
+            style={{ color: accent }}
+          >
             {str(props, "eyebrow")}
-          </div>
+          </Inline>
         )}
-        <h1 className="text-4xl font-bold leading-tight md:text-5xl">{str(props, "title")}</h1>
-        <p className="mt-5 text-lg opacity-80">{str(props, "subtitle")}</p>
+        <Inline as="h1" fieldKeys={["title"]} className="text-4xl font-bold leading-tight md:text-5xl">
+          {str(props, "title")}
+        </Inline>
+        <Inline as="p" fieldKeys={["subtitle"]} className="mt-5 text-lg opacity-80">
+          {str(props, "subtitle")}
+        </Inline>
         <div
           className={cn(
             "mt-8 flex flex-wrap gap-4",
@@ -68,19 +82,23 @@ export function HeroBlock({ props, interactive }: BlockRenderProps) {
             align === "right" && "justify-end",
           )}
         >
-          <BlockButton bg={accent} fg="#ffffff" href={str(props, "primaryUrl")} interactive={interactive}>
-            {str(props, "primaryText", "Начать")}
-          </BlockButton>
-          {showSecondary && (
-            <BlockButton
-              bg="transparent"
-              fg={textColor}
-              outline
-              href={str(props, "secondaryUrl")}
-              interactive={interactive}
-            >
-              {str(props, "secondaryText", "Подробнее")}
+          <Inline fieldKeys={["primaryText", "primaryUrl", "accent"]}>
+            <BlockButton bg={accent} fg="#ffffff" href={str(props, "primaryUrl")} interactive={interactive}>
+              {str(props, "primaryText", "Начать")}
             </BlockButton>
+          </Inline>
+          {showSecondary && (
+            <Inline fieldKeys={["secondaryText", "secondaryUrl"]}>
+              <BlockButton
+                bg="transparent"
+                fg={textColor}
+                outline
+                href={str(props, "secondaryUrl")}
+                interactive={interactive}
+              >
+                {str(props, "secondaryText", "Подробнее")}
+              </BlockButton>
+            </Inline>
           )}
         </div>
         {showImage && (
@@ -103,8 +121,12 @@ export function FeaturesBlock({ props }: BlockRenderProps) {
   return (
     <Section props={props} className="py-20">
       <Container>
-        <h2 className="text-center text-3xl font-bold">{str(props, "title")}</h2>
-        <p className="mt-3 text-center opacity-70">{str(props, "subtitle")}</p>
+        <Inline as="h2" fieldKeys={["title"]} className="text-center text-3xl font-bold">
+          {str(props, "title")}
+        </Inline>
+        <Inline as="p" fieldKeys={["subtitle"]} className="mt-3 text-center opacity-70">
+          {str(props, "subtitle")}
+        </Inline>
         <div className="mt-12 grid gap-6 md:grid-cols-3">
           {items.map((it, i) => (
             <div key={i} className="rounded-2xl p-7" style={{ backgroundColor: `${accent}14` }}>
@@ -114,8 +136,12 @@ export function FeaturesBlock({ props }: BlockRenderProps) {
               >
                 {i + 1}
               </div>
-              <h3 className="text-lg font-semibold">{it.title}</h3>
-              <p className="mt-2 text-sm opacity-75">{it.text}</p>
+              <Inline as="h3" fieldKeys={[`f${i + 1}Title`]} className="text-lg font-semibold">
+                {it.title}
+              </Inline>
+              <Inline as="p" fieldKeys={[`f${i + 1}Text`]} className="mt-2 text-sm opacity-75">
+                {it.text}
+              </Inline>
             </div>
           ))}
         </div>
@@ -132,9 +158,13 @@ export function TextImageBlock({ props }: BlockRenderProps) {
     <Section props={props} className="py-20">
       <Container className="grid items-center gap-12 md:grid-cols-2">
         <div className={cn(reverse && "md:order-2")}>
-          <h2 className="text-3xl font-bold">{str(props, "title")}</h2>
+          <Inline as="h2" fieldKeys={["title"]} className="text-3xl font-bold">
+            {str(props, "title")}
+          </Inline>
           <div className="mt-4 h-1 w-12 rounded-full" style={{ backgroundColor: accent }} />
-          <p className="mt-5 whitespace-pre-line opacity-80">{str(props, "text")}</p>
+          <Inline as="p" fieldKeys={["text"]} className="mt-5 whitespace-pre-line opacity-80">
+            {str(props, "text")}
+          </Inline>
         </div>
         <div className={cn(reverse && "md:order-1")}>
           <BlockImage src={str(props, "image")} alt={str(props, "title")} aspect="square" />
@@ -159,7 +189,9 @@ export function TextBlock({ props }: BlockRenderProps) {
       }}
     >
       <Container className="max-w-3xl">
-        <h2
+        <Inline
+          as="h2"
+          fieldKeys={["title"]}
           className={cn(
             "text-3xl font-bold",
             align === "center" && "text-center",
@@ -167,8 +199,10 @@ export function TextBlock({ props }: BlockRenderProps) {
           )}
         >
           {str(props, "title")}
-        </h2>
-        <p
+        </Inline>
+        <Inline
+          as="p"
+          fieldKeys={["text"]}
           className={cn(
             "mt-4 whitespace-pre-line opacity-80",
             align === "center" && "text-center",
@@ -176,7 +210,7 @@ export function TextBlock({ props }: BlockRenderProps) {
           )}
         >
           {str(props, "text")}
-        </p>
+        </Inline>
       </Container>
     </section>
   );
@@ -189,7 +223,9 @@ export function GalleryBlock({ props }: BlockRenderProps) {
   return (
     <Section props={props} className="py-20">
       <Container>
-        <h2 className="text-center text-3xl font-bold">{str(props, "title")}</h2>
+        <Inline as="h2" fieldKeys={["title"]} className="text-center text-3xl font-bold">
+          {str(props, "title")}
+        </Inline>
         {images.length > 0 ? (
           <div
             className={cn(
@@ -227,8 +263,12 @@ export function PricingBlock({ props, interactive }: BlockRenderProps) {
   return (
     <Section props={props} className="py-20">
       <Container>
-        <h2 className="text-center text-3xl font-bold">{str(props, "title")}</h2>
-        <p className="mt-3 text-center opacity-70">{str(props, "subtitle")}</p>
+        <Inline as="h2" fieldKeys={["title"]} className="text-center text-3xl font-bold">
+          {str(props, "title")}
+        </Inline>
+        <Inline as="p" fieldKeys={["subtitle"]} className="mt-3 text-center opacity-70">
+          {str(props, "subtitle")}
+        </Inline>
         <div className="mt-12 grid gap-6 md:grid-cols-3">
           {plans.map((plan, i) => (
             <div
@@ -236,22 +276,31 @@ export function PricingBlock({ props, interactive }: BlockRenderProps) {
               className="rounded-2xl border p-7"
               style={{ borderColor: `${accent}44` }}
             >
-              <h3 className="text-lg font-semibold">{plan.name}</h3>
-              <div className="mt-2 text-3xl font-bold" style={{ color: accent }}>
+              <Inline as="h3" fieldKeys={[`p${i + 1}Name`]} className="text-lg font-semibold">
+                {plan.name}
+              </Inline>
+              <Inline
+                as="div"
+                fieldKeys={[`p${i + 1}Price`]}
+                className="mt-2 text-3xl font-bold"
+                style={{ color: accent }}
+              >
                 {plan.price}
-              </div>
-              <ul className="mt-5 space-y-2 text-sm opacity-80">
+              </Inline>
+              <Inline as="ul" fieldKeys={[`p${i + 1}Features`]} className="mt-5 space-y-2 text-sm opacity-80">
                 {plan.features.map((f, j) => (
                   <li key={j} className="flex items-start gap-2">
                     <span style={{ color: accent }}>✓</span>
                     {f}
                   </li>
                 ))}
-              </ul>
+              </Inline>
               <div className="mt-6">
-                <BlockButton bg={accent} fg="#ffffff" href={str(props, "buttonUrl")} interactive={interactive}>
-                  {str(props, "buttonText", "Выбрать")}
-                </BlockButton>
+                <Inline fieldKeys={["buttonText", "buttonUrl", "accent"]}>
+                  <BlockButton bg={accent} fg="#ffffff" href={str(props, "buttonUrl")} interactive={interactive}>
+                    {str(props, "buttonText", "Выбрать")}
+                  </BlockButton>
+                </Inline>
               </div>
             </div>
           ))}
@@ -270,12 +319,18 @@ export function FaqBlock({ props }: BlockRenderProps) {
   return (
     <Section props={props} className="py-20">
       <Container className="max-w-3xl">
-        <h2 className="text-center text-3xl font-bold">{str(props, "title")}</h2>
+        <Inline as="h2" fieldKeys={["title"]} className="text-center text-3xl font-bold">
+          {str(props, "title")}
+        </Inline>
         <div className="mt-8 space-y-3">
           {items.map((it, i) => (
             <details key={i} className="rounded-xl border border-neutral-200 p-5">
-              <summary className="cursor-pointer list-none font-semibold">{it.q}</summary>
-              <p className="mt-2 text-sm opacity-80">{it.a}</p>
+              <Inline as="summary" fieldKeys={[`q${i + 1}`]} className="cursor-pointer list-none font-semibold">
+                {it.q}
+              </Inline>
+              <Inline as="p" fieldKeys={[`a${i + 1}`]} className="mt-2 text-sm opacity-80">
+                {it.a}
+              </Inline>
             </details>
           ))}
         </div>
@@ -288,17 +343,23 @@ export function CtaBlock({ props, interactive }: BlockRenderProps) {
   return (
     <Section props={props} className="py-20 text-center">
       <Container>
-        <h2 className="text-3xl font-bold">{str(props, "title")}</h2>
-        <p className="mt-3 opacity-80">{str(props, "subtitle")}</p>
+        <Inline as="h2" fieldKeys={["title"]} className="text-3xl font-bold">
+          {str(props, "title")}
+        </Inline>
+        <Inline as="p" fieldKeys={["subtitle"]} className="mt-3 opacity-80">
+          {str(props, "subtitle")}
+        </Inline>
         <div className="mt-8">
-          <BlockButton
-            bg={col(props, "buttonColor", "#ffffff")}
-            fg={col(props, "buttonTextColor", "#2563eb")}
-            href={str(props, "buttonUrl")}
-            interactive={interactive}
-          >
-            {str(props, "buttonText", "Связаться")}
-          </BlockButton>
+          <Inline fieldKeys={["buttonText", "buttonUrl", "buttonColor", "buttonTextColor"]}>
+            <BlockButton
+              bg={col(props, "buttonColor", "#ffffff")}
+              fg={col(props, "buttonTextColor", "#2563eb")}
+              href={str(props, "buttonUrl")}
+              interactive={interactive}
+            >
+              {str(props, "buttonText", "Связаться")}
+            </BlockButton>
+          </Inline>
         </div>
       </Container>
     </Section>
@@ -316,12 +377,16 @@ export function FooterBlock({ props }: BlockRenderProps) {
     >
       <Container>
         <div className="max-w-sm">
-          <div className="text-lg font-bold" style={{ color: "#ffffff" }}>
+          <Inline as="div" fieldKeys={["brand"]} className="text-lg font-bold" style={{ color: "#ffffff" }}>
             {str(props, "brand", "Логотип")}
-          </div>
-          <p className="mt-2 text-sm">{str(props, "text")}</p>
+          </Inline>
+          <Inline as="p" fieldKeys={["text"]} className="mt-2 text-sm">
+            {str(props, "text")}
+          </Inline>
         </div>
-        <div className="mt-8 border-t border-white/10 pt-6 text-sm">{str(props, "copyright")}</div>
+        <Inline as="div" fieldKeys={["copyright"]} className="mt-8 border-t border-white/10 pt-6 text-sm">
+          {str(props, "copyright")}
+        </Inline>
       </Container>
     </footer>
   );
@@ -337,14 +402,18 @@ export function StatsBlock({ props }: BlockRenderProps) {
   return (
     <Section props={props} className="py-16 text-center">
       <Container>
-        <h2 className="text-3xl font-bold">{str(props, "title")}</h2>
+        <Inline as="h2" fieldKeys={["title"]} className="text-3xl font-bold">
+          {str(props, "title")}
+        </Inline>
         <div className="mt-10 grid gap-8 md:grid-cols-3">
           {items.map((it, i) => (
             <div key={i}>
-              <div className="text-4xl font-bold" style={{ color: accent }}>
+              <Inline as="div" fieldKeys={[`s${i + 1}Value`]} className="text-4xl font-bold" style={{ color: accent }}>
                 {it.value}
-              </div>
-              <div className="mt-2 text-sm opacity-75">{it.label}</div>
+              </Inline>
+              <Inline as="div" fieldKeys={[`s${i + 1}Label`]} className="mt-2 text-sm opacity-75">
+                {it.label}
+              </Inline>
             </div>
           ))}
         </div>
@@ -364,15 +433,23 @@ export function TestimonialsBlock({ props }: BlockRenderProps) {
   return (
     <Section props={props} className="py-20">
       <Container>
-        <h2 className="text-center text-3xl font-bold">{str(props, "title")}</h2>
+        <Inline as="h2" fieldKeys={["title"]} className="text-center text-3xl font-bold">
+          {str(props, "title")}
+        </Inline>
         <div className="mt-12 grid gap-6 md:grid-cols-3">
           {items.map((it, i) => (
             <div key={i} className="rounded-2xl border border-neutral-200 p-6">
               <div className="text-2xl" style={{ color: accent }}>“</div>
-              <p className="mt-2 text-sm opacity-80">{it.text}</p>
+              <Inline as="p" fieldKeys={[`t${i + 1}Text`]} className="mt-2 text-sm opacity-80">
+                {it.text}
+              </Inline>
               <div className="mt-4 border-t border-neutral-200 pt-3">
-                <div className="font-semibold">{it.name}</div>
-                <div className="text-xs opacity-60">{it.role}</div>
+                <Inline as="div" fieldKeys={[`t${i + 1}Name`]} className="font-semibold">
+                  {it.name}
+                </Inline>
+                <Inline as="div" fieldKeys={[`t${i + 1}Role`]} className="text-xs opacity-60">
+                  {it.role}
+                </Inline>
               </div>
             </div>
           ))}
@@ -392,7 +469,9 @@ export function TeamBlock({ props }: BlockRenderProps) {
   return (
     <Section props={props} className="py-20">
       <Container>
-        <h2 className="text-center text-3xl font-bold">{str(props, "title")}</h2>
+        <Inline as="h2" fieldKeys={["title"]} className="text-center text-3xl font-bold">
+          {str(props, "title")}
+        </Inline>
         <div className="mt-12 grid gap-8 md:grid-cols-3">
           {members.map((m, i) => (
             <div key={i} className="text-center">
@@ -407,8 +486,12 @@ export function TeamBlock({ props }: BlockRenderProps) {
                   .join("")
                   .toUpperCase()}
               </div>
-              <div className="mt-4 font-semibold">{m.name}</div>
-              <div className="mt-1 text-sm opacity-60">{m.role}</div>
+              <Inline as="div" fieldKeys={[`m${i + 1}Name`]} className="mt-4 font-semibold">
+                {m.name}
+              </Inline>
+              <Inline as="div" fieldKeys={[`m${i + 1}Role`]} className="mt-1 text-sm opacity-60">
+                {m.role}
+              </Inline>
             </div>
           ))}
         </div>
@@ -427,7 +510,9 @@ export function StepsBlock({ props }: BlockRenderProps) {
   return (
     <Section props={props} className="py-20">
       <Container>
-        <h2 className="text-center text-3xl font-bold">{str(props, "title")}</h2>
+        <Inline as="h2" fieldKeys={["title"]} className="text-center text-3xl font-bold">
+          {str(props, "title")}
+        </Inline>
         <div className="mt-12 grid gap-8 md:grid-cols-3">
           {steps.map((s, i) => (
             <div key={i} className="relative rounded-2xl border border-neutral-200 p-6">
@@ -437,8 +522,12 @@ export function StepsBlock({ props }: BlockRenderProps) {
               >
                 {i + 1}
               </div>
-              <h3 className="mt-4 text-lg font-semibold">{s.title}</h3>
-              <p className="mt-2 text-sm opacity-75">{s.text}</p>
+              <Inline as="h3" fieldKeys={[`st${i + 1}Title`]} className="mt-4 text-lg font-semibold">
+                {s.title}
+              </Inline>
+              <Inline as="p" fieldKeys={[`st${i + 1}Text`]} className="mt-2 text-sm opacity-75">
+                {s.text}
+              </Inline>
             </div>
           ))}
         </div>
@@ -450,27 +539,33 @@ export function StepsBlock({ props }: BlockRenderProps) {
 export function ContactBlock({ props, interactive }: BlockRenderProps) {
   const accent = col(props, "accent", "#2563eb");
   const rows = [
-    { label: "Адрес", value: str(props, "address") },
-    { label: "Телефон", value: str(props, "phone") },
-    { label: "Email", value: str(props, "email") },
+    { label: "Адрес", key: "address" },
+    { label: "Телефон", key: "phone" },
+    { label: "Email", key: "email" },
   ];
 
   return (
     <Section props={props} className="py-20">
       <Container className="max-w-3xl text-center">
-        <h2 className="text-3xl font-bold">{str(props, "title")}</h2>
+        <Inline as="h2" fieldKeys={["title"]} className="text-3xl font-bold">
+          {str(props, "title")}
+        </Inline>
         <div className="mt-10 space-y-3">
           {rows.map((r) => (
-            <div key={r.label} className="rounded-xl border border-neutral-200 p-4">
+            <div key={r.key} className="rounded-xl border border-neutral-200 p-4">
               <div className="text-xs uppercase tracking-wide opacity-60">{r.label}</div>
-              <div className="mt-1 font-medium">{r.value}</div>
+              <Inline as="div" fieldKeys={[r.key]} className="mt-1 font-medium">
+                {str(props, r.key)}
+              </Inline>
             </div>
           ))}
         </div>
         <div className="mt-8">
-          <BlockButton bg={accent} fg="#ffffff" href={str(props, "buttonUrl")} interactive={interactive}>
-            {str(props, "buttonText", "Написать нам")}
-          </BlockButton>
+          <Inline fieldKeys={["buttonText", "buttonUrl", "accent"]}>
+            <BlockButton bg={accent} fg="#ffffff" href={str(props, "buttonUrl")} interactive={interactive}>
+              {str(props, "buttonText", "Написать нам")}
+            </BlockButton>
+          </Inline>
         </div>
       </Container>
     </Section>

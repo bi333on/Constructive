@@ -29,6 +29,7 @@ import type { BlockInstance } from "@/blocks/types";
 import { cn } from "@/lib/utils";
 import { useEditorStore } from "./store";
 import { BlockPicker } from "./BlockPicker";
+import { InlineBlock } from "./inline";
 
 function ToolButton({
   title,
@@ -120,7 +121,9 @@ function BlockItem({ block }: { block: BlockInstance }) {
         </>
       )}
 
-      {reg.render({ props: block.props, interactive: false })}
+      <InlineBlock blockId={block.id}>
+        {reg.render({ props: block.props, interactive: false })}
+      </InlineBlock>
     </div>
   );
 }

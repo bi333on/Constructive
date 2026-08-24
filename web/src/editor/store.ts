@@ -177,3 +177,21 @@ export const useSaveStore = create<SaveState>()((set) => ({
   status: "saved",
   setStatus: (status) => set({ status }),
 }));
+
+export interface InlineEditRequest {
+  blockId: string;
+  fieldKeys: string[];
+}
+
+interface InlineEditState {
+  edit: InlineEditRequest | null;
+  begin: (blockId: string, fieldKeys: string[]) => void;
+  end: () => void;
+}
+
+/** Текущий инлайн-редактируемый элемент (узкая панель инструментов). */
+export const useInlineStore = create<InlineEditState>()((set) => ({
+  edit: null,
+  begin: (blockId, fieldKeys) => set({ edit: { blockId, fieldKeys } }),
+  end: () => set({ edit: null }),
+}));
