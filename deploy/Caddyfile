@@ -4,13 +4,13 @@
 # Глобальные опции: разрешение on-demand TLS через endpoint приложения
 {
     on_demand_tls {
-        ask http://127.0.0.1:__PORT__/api/caddy/ask
+        ask http://localhost:__PORT__/api/caddy/ask
     }
 }
 
 # Основной домен — приложение (редактор, дашборд)
 __DOMAIN__ {
-    reverse_proxy 127.0.0.1:__PORT__
+    reverse_proxy localhost:__PORT__
     encode gzip
 }
 
@@ -19,7 +19,7 @@ __DOMAIN__ {
     tls {
         on_demand
     }
-    reverse_proxy 127.0.0.1:__PORT__
+    reverse_proxy localhost:__PORT__
     encode gzip
 }
 
@@ -28,6 +28,6 @@ https:// {
     tls {
         on_demand
     }
-    reverse_proxy 127.0.0.1:__PORT__
+    reverse_proxy localhost:__PORT__
     encode gzip
 }
