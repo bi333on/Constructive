@@ -27,7 +27,8 @@ CREATE TABLE IF NOT EXISTS page_versions (
 
 CREATE TABLE IF NOT EXISTS published_pages (
   page_id TEXT PRIMARY KEY,
-  slug TEXT NOT NULL UNIQUE,
+  project_id TEXT,
+  slug TEXT NOT NULL,
   title TEXT NOT NULL,
   description TEXT NOT NULL DEFAULT '',
   blocks TEXT NOT NULL,
@@ -93,7 +94,43 @@ export function openDatabase(dbPath: string): DatabaseSync {
 
   // Миграция: собственный домен проекта.
   ensureColumn(db, "projects", "domain", "TEXT");
+
+  // Миграция: published_pages v2 — slug уникален в рамках проекта (а не глобально).
+  migratePublishedPages(db);
   return db;
+}
+
+function migratePublishedPages(db: DatabaseSync) {
+  const cols = db
+    .prepare("PRAGMA table_info(published_pages)")
+    .all() as unknown as { name: string }[];
+  if (!cols.some((c) => c.name === "project_id")) {
+    db.exec(`
+      ALTER TABLE published_pages RENAME TO published_pages_old;
+      CREATE TABLE published_pages (
+        page_id TEXT PRIMARY KEY,
+        project_id TEXT,
+        slug TEXT NOT NULL,
+        title TEXT NOT NULL,
+        description TEXT NOT NULL DEFAULT '',
+        blocks TEXT NOT NULL,
+        published_at TEXT NOT NULL DEFAULT (datetime('now')),
+        updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+      );
+      INSERT INTO published_pages (page_id, project_id, slug, title, description, blocks, published_at, updated_at)
+        SELECT pp.page_id, p.project_id, pp.slug, pp.title, pp.description, pp.blocks, pp.published_at, pp.updated_at
+        FROM published_pages_old pp
+        LEFT JOIN pages p ON p.id = pp.page_id;
+      DROP TABLE published_pages_old;
+    `);
+  }
+
+  db.exec(`
+    CREATE UNIQUE INDEX IF NOT EXISTS published_pages_project_slug_idx
+      ON published_pages(project_id, slug);
+    CREATE INDEX IF NOT EXISTS published_pages_slug_idx
+      ON published_pages(slug);
+  `);
 }
 
 const globalForDb = globalThis as unknown as { __builderDb?: DatabaseSync };

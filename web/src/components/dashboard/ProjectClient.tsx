@@ -128,7 +128,7 @@ export function ProjectClient({
               <div className="min-w-0">
                 <div className="truncate font-medium text-neutral-900">{page.title}</div>
                 <div className="mt-0.5 truncate text-xs text-neutral-400">
-                  {page.slug ? `/p/${page.slug}` : "без адреса"} ·{" "}
+                  {page.slug ? `/${page.slug}` : "без адреса"} ·{" "}
                   {page.published ? "опубликована" : "черновик"}
                 </div>
               </div>
@@ -142,7 +142,11 @@ export function ProjectClient({
                 </Link>
                 {page.published && page.slug && (
                   <Link
-                    href={`/p/${page.slug}`}
+                    href={
+                      baseDomain && project.subdomain
+                        ? `https://${project.subdomain}.${baseDomain}/${page.slug}`
+                        : `/p/${page.slug}`
+                    }
                     target="_blank"
                     title="Открыть опубликованную страницу"
                     className="rounded-lg p-2 text-neutral-500 hover:bg-neutral-100"

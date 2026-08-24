@@ -29,6 +29,7 @@ interface PageRow {
   blocks: string;
   published: number;
   updated_at: string;
+  project_id: string | null;
 }
 
 function rowToPage(row: PageRow): PageData {
@@ -144,19 +145,42 @@ export async function publishPage(pageId: string): Promise<ActionResult> {
   if (!row) return { error: "Страница не найдена" };
 
   const db = getDb();
-  const slug = row.slug || slugify(row.title);
+  const baseSlug = row.slug || slugify(row.title);
+
+  // Slug уникален в рамках проекта: при совпадении добавляем -2, -3…
+  let slug = baseSlug;
+  let i = 2;
+  while (
+    db
+      .prepare(
+        "SELECT page_id FROM published_pages WHERE project_id IS ? AND slug = ? AND page_id != ?",
+      )
+      .get(row.project_id ?? null, slug, pageId)
+  ) {
+    slug = `${baseSlug}-${i++}`;
+  }
+
   const now = new Date().toISOString();
 
   db.prepare(
-    `INSERT INTO published_pages (page_id, slug, title, description, blocks, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?)
+    `INSERT INTO published_pages (page_id, project_id, slug, title, description, blocks, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?)
      ON CONFLICT(page_id) DO UPDATE SET
+       project_id = excluded.project_id,
        slug = excluded.slug,
        title = excluded.title,
        description = excluded.description,
        blocks = excluded.blocks,
        updated_at = excluded.updated_at`,
-  ).run(pageId, slug, row.title, row.description, row.blocks, now);
+  ).run(
+    pageId,
+    row.project_id ?? null,
+    slug,
+    row.title,
+    row.description,
+    row.blocks,
+    now,
+  );
 
   db.prepare(
     "UPDATE pages SET slug = ?, published = 1, updated_at = ? WHERE id = ?",

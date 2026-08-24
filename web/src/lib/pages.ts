@@ -22,7 +22,7 @@ export const getPublishedPage = cache(
     const db = getDb();
     const row = db
       .prepare(
-        "SELECT slug, title, description, blocks FROM published_pages WHERE slug = ?",
+        "SELECT slug, title, description, blocks FROM published_pages WHERE slug = ? ORDER BY published_at DESC LIMIT 1",
       )
       .get(slug) as unknown as PublishedRow | undefined;
     if (!row) return null;
