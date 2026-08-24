@@ -195,3 +195,35 @@ export const useInlineStore = create<InlineEditState>()((set) => ({
   begin: (blockId, fieldKeys) => set({ edit: { blockId, fieldKeys } }),
   end: () => set({ edit: null }),
 }));
+
+interface StyleClipboardState {
+  values: Record<string, unknown> | null;
+  copy: (blockId: string) => void;
+  paste: (blockId: string) => void;
+}
+
+/** Буфер «скопировать/вставить стиль» между блоками. */
+export const useStyleClipboard = create<StyleClipboardState>()((set, get) => ({
+  values: null,
+  copy: (blockId) => {
+    const block = useEditorStore.getState().page.blocks.find((b) => b.id === blockId);
+    if (!block) return;
+    const def = getBlockDefinition(block.type);
+    const keys = (def?.fields ?? []).filter((f) => f.group === "style").map((f) => f.key);
+    const values: Record<string, unknown> = {};
+    for (const k of keys) values[k] = block.props[k];
+    set({ values });
+  },
+  paste: (blockId) => {
+    const values = get().values;
+    if (!values) return;
+    const state = useEditorStore.getState();
+    const block = state.page.blocks.find((b) => b.id === blockId);
+    if (!block) return;
+    const def = getBlockDefinition(block.type);
+    const keys = (def?.fields ?? []).filter((f) => f.group === "style").map((f) => f.key);
+    const patch: Record<string, unknown> = {};
+    for (const k of keys) if (k in values) patch[k] = values[k];
+    if (Object.keys(patch).length > 0) state.updateProps(blockId, patch);
+  },
+}));

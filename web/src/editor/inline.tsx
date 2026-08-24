@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from "react";
 import { cn } from "@/lib/utils";
+import { richTextToHtml } from "@/lib/rich";
 
 export interface InlineEditRequest {
   blockId: string;
@@ -69,33 +70,48 @@ export function Inline({
   children: ReactNode;
 }) {
   const ctx = useInline();
+  const html = typeof children === "string" ? richTextToHtml(children) : null;
 
   if (!ctx) {
     if (as) {
       const Tag = as as any;
-      return (
+      return html !== null ? (
+        <Tag className={className} style={style} dangerouslySetInnerHTML={{ __html: html }} />
+      ) : (
         <Tag className={className} style={style}>
           {children}
         </Tag>
       );
     }
-    return <>{children}</>;
+    return html !== null ? (
+      <span dangerouslySetInnerHTML={{ __html: html }} />
+    ) : (
+      <>{children}</>
+    );
   }
 
   const Tag = (as ?? "span") as any;
-  return (
+  const cls = cn(
+    "cursor-text rounded-sm transition-shadow hover:ring-2 hover:ring-blue-400/70",
+    className,
+  );
+  const handlers = {
+    onClick: (e: MouseEvent<HTMLElement>) => {
+      e.stopPropagation();
+      ctx.begin(ctx.blockId, fieldKeys);
+    },
+    onMouseDown: (e: MouseEvent<HTMLElement>) => e.stopPropagation(),
+  };
+
+  return html !== null ? (
     <Tag
-      className={cn(
-        "cursor-text rounded-sm transition-shadow hover:ring-2 hover:ring-blue-400/70",
-        className,
-      )}
+      className={cls}
       style={style}
-      onClick={(e: MouseEvent<HTMLElement>) => {
-        e.stopPropagation();
-        ctx.begin(ctx.blockId, fieldKeys);
-      }}
-      onMouseDown={(e: MouseEvent<HTMLElement>) => e.stopPropagation()}
-    >
+      {...handlers}
+      dangerouslySetInnerHTML={{ __html: html }}
+    />
+  ) : (
+    <Tag className={cls} style={style} {...handlers}>
       {children}
     </Tag>
   );

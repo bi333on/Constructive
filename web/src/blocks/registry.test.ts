@@ -3,7 +3,7 @@ import { blockList, blockRegistry, getBlockDefinition } from "./registry";
 
 describe("реестр блоков", () => {
   it("содержит все стартовые блоки", () => {
-    expect(blockList.length).toBe(16);
+    expect(blockList.length).toBe(17);
   });
 
   it("каждый блок имеет схему, иконку и компонент рендера", () => {

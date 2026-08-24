@@ -21,6 +21,7 @@ import type { BlockDefinition } from "./types";
 import type { BlockRenderProps } from "./components/common";
 import { blockDefinitions } from "./definitions";
 import {
+  ColumnsBlock,
   ContactBlock,
   CtaBlock,
   FaqBlock,
@@ -62,6 +63,7 @@ const renderMap: Record<string, (props: BlockRenderProps) => React.ReactNode> = 
   steps: StepsBlock,
   contact: ContactBlock,
   spacer: SpacerBlock,
+  columns: ColumnsBlock,
 };
 
 const iconMap: Record<string, LucideIcon> = {
@@ -81,6 +83,7 @@ const iconMap: Record<string, LucideIcon> = {
   steps: ListOrdered,
   contact: Mail,
   spacer: ArrowUpDown,
+  columns: Columns2,
 };
 
 export const blockRegistry: Record<string, RegisteredBlock> = Object.fromEntries(

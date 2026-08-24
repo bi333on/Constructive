@@ -18,8 +18,10 @@ import { CSS } from "@dnd-kit/utilities";
 import {
   ArrowDown,
   ArrowUp,
+  ClipboardPaste,
   Copy,
   GripVertical,
+  Paintbrush,
   Plus,
   Settings2,
   Trash2,
@@ -28,7 +30,7 @@ import {
 import { blockRegistry } from "@/blocks/registry";
 import type { BlockInstance } from "@/blocks/types";
 import { cn } from "@/lib/utils";
-import { useEditorStore } from "./store";
+import { useEditorStore, useStyleClipboard } from "./store";
 import { BlockPicker } from "./BlockPicker";
 import { BlockSettingsModal } from "./BlockSettingsModal";
 import { InlineBlock } from "./inline";
@@ -74,6 +76,9 @@ function BlockItem({
   const duplicateBlock = useEditorStore((s) => s.duplicateBlock);
   const removeBlock = useEditorStore((s) => s.removeBlock);
   const moveBlockBy = useEditorStore((s) => s.moveBlockBy);
+  const copyStyle = useStyleClipboard((s) => s.copy);
+  const pasteStyle = useStyleClipboard((s) => s.paste);
+  const hasCopiedStyle = useStyleClipboard((s) => s.values !== null);
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: block.id });
@@ -115,6 +120,14 @@ function BlockItem({
             <ToolButton title="Дублировать" onClick={(e) => { e.stopPropagation(); duplicateBlock(block.id); }}>
               <Copy className="h-4 w-4" />
             </ToolButton>
+            <ToolButton title="Копировать стиль" onClick={(e) => { e.stopPropagation(); copyStyle(block.id); }}>
+              <Paintbrush className="h-4 w-4" />
+            </ToolButton>
+            {hasCopiedStyle && (
+              <ToolButton title="Вставить стиль" onClick={(e) => { e.stopPropagation(); pasteStyle(block.id); }}>
+                <ClipboardPaste className="h-4 w-4" />
+              </ToolButton>
+            )}
             <ToolButton title="Настройки блока" onClick={(e) => { e.stopPropagation(); onOpenSettings(block.id); }}>
               <Settings2 className="h-4 w-4" />
             </ToolButton>

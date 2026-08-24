@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { richTextToHtml } from "@/lib/rich";
 import { Inline } from "@/editor/inline";
 import { bool, col, num, str } from "../types";
 import { BlockButton, BlockImage, Container, Section, type BlockRenderProps } from "./common";
@@ -102,9 +103,9 @@ export function HeroBlock({ props, interactive }: BlockRenderProps) {
           )}
         </div>
         {showImage && (
-          <div className="mt-10">
+          <Inline as="div" fieldKeys={["image"]} className="mt-10">
             <BlockImage src={str(props, "image")} alt={str(props, "title")} aspect="video" />
-          </div>
+          </Inline>
         )}
       </Container>
     </section>
@@ -166,9 +167,9 @@ export function TextImageBlock({ props }: BlockRenderProps) {
             {str(props, "text")}
           </Inline>
         </div>
-        <div className={cn(reverse && "md:order-1")}>
+        <Inline as="div" fieldKeys={["image"]} className={cn(reverse && "md:order-1")}>
           <BlockImage src={str(props, "image")} alt={str(props, "title")} aspect="square" />
-        </div>
+        </Inline>
       </Container>
     </Section>
   );
@@ -218,7 +219,9 @@ export function TextBlock({ props }: BlockRenderProps) {
 
 export function GalleryBlock({ props }: BlockRenderProps) {
   const cols = str(props, "columns", "3");
-  const images = [1, 2, 3, 4, 5, 6].map((i) => str(props, `img${i}`)).filter(Boolean);
+  const images = [1, 2, 3, 4, 5, 6]
+    .map((i) => ({ i, src: str(props, `img${i}`) }))
+    .filter((x) => x.src);
 
   return (
     <Section props={props} className="py-20">
@@ -235,8 +238,10 @@ export function GalleryBlock({ props }: BlockRenderProps) {
               (cols === "3" || !cols) && "grid-cols-2 md:grid-cols-3",
             )}
           >
-            {images.map((src, i) => (
-              <BlockImage key={i} src={src} alt="" aspect="square" />
+            {images.map(({ i, src }) => (
+              <Inline as="div" key={i} fieldKeys={[`img${i}`]}>
+                <BlockImage src={src} alt="" aspect="square" />
+              </Inline>
             ))}
           </div>
         ) : (
@@ -255,7 +260,7 @@ export function PricingBlock({ props, interactive }: BlockRenderProps) {
     name: str(props, `p${i}Name`),
     price: str(props, `p${i}Price`),
     features: str(props, `p${i}Features`)
-      .split("\n")
+      .split(/\n|<br\s*\/?>/i)
       .map((s) => s.trim())
       .filter(Boolean),
   }));
@@ -291,7 +296,7 @@ export function PricingBlock({ props, interactive }: BlockRenderProps) {
                 {plan.features.map((f, j) => (
                   <li key={j} className="flex items-start gap-2">
                     <span style={{ color: accent }}>✓</span>
-                    {f}
+                    <span dangerouslySetInnerHTML={{ __html: richTextToHtml(f) }} />
                   </li>
                 ))}
               </Inline>
@@ -578,5 +583,37 @@ export function SpacerBlock({ props }: BlockRenderProps) {
     <Inline as="div" fieldKeys={["height"]} className="w-full" style={{ height }}>
       {""}
     </Inline>
+  );
+}
+
+export function ColumnsBlock({ props }: BlockRenderProps) {
+  const n = parseInt(str(props, "columns", "2"), 10) || 2;
+  const count = Math.max(2, Math.min(4, n));
+  const cols = [1, 2, 3, 4].slice(0, count);
+
+  return (
+    <Section props={props} className="py-20">
+      <Container>
+        <div
+          className={cn(
+            "grid gap-8",
+            count === 2 && "md:grid-cols-2",
+            count === 3 && "md:grid-cols-3",
+            count === 4 && "md:grid-cols-2 lg:grid-cols-4",
+          )}
+        >
+          {cols.map((i) => (
+            <div key={i}>
+              <Inline as="h3" fieldKeys={[`c${i}Title`]} className="text-lg font-semibold">
+                {str(props, `c${i}Title`)}
+              </Inline>
+              <Inline as="p" fieldKeys={[`c${i}Text`]} className="mt-2 text-sm opacity-80">
+                {str(props, `c${i}Text`)}
+              </Inline>
+            </div>
+          ))}
+        </div>
+      </Container>
+    </Section>
   );
 }

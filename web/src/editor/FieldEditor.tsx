@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { AlignCenter, AlignLeft, AlignRight, Link, Upload } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { BlockField, ImageField } from "@/blocks/types";
+import { RichTextEditor } from "./RichTextEditor";
 
 const inputCls =
   "w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20";
@@ -115,23 +116,17 @@ function FieldControl({ field, value, onChange }: Props) {
   switch (field.type) {
     case "text":
       return (
-        <input
-          type="text"
-          className={inputCls}
-          placeholder={field.placeholder}
+        <RichTextEditor
           value={String(value ?? field.defaultValue ?? "")}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={onChange}
         />
       );
 
     case "textarea":
       return (
-        <textarea
-          className={cn(inputCls, "resize-y leading-relaxed")}
-          rows={field.rows ?? 4}
-          placeholder={field.placeholder}
+        <RichTextEditor
           value={String(value ?? field.defaultValue ?? "")}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={onChange}
         />
       );
 

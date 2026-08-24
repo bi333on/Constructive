@@ -1,6 +1,7 @@
 import type { CSSProperties, ReactNode } from "react";
 import { Image as ImageIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { richTextToHtml } from "@/lib/rich";
 import type { BlockProps } from "../types";
 import { col } from "../types";
 
@@ -72,6 +73,12 @@ export function BlockButton({
     color: fg,
     border: outline ? `1px solid ${fg}` : undefined,
   };
+  const content =
+    typeof children === "string" ? (
+      <span dangerouslySetInnerHTML={{ __html: richTextToHtml(children) }} />
+    ) : (
+      children
+    );
 
   if (href && interactive) {
     const external = /^https?:\/\//.test(href);
@@ -82,14 +89,14 @@ export function BlockButton({
         style={style}
         {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
       >
-        {children}
+        {content}
       </a>
     );
   }
 
   return (
     <span className={cls} style={style}>
-      {children}
+      {content}
     </span>
   );
 }
