@@ -150,7 +150,7 @@ function BlockItem({ block }: { block: BlockInstance }) {
         </>
       )}
 
-      {reg.render({ props: block.props })}
+      {reg.render({ props: block.props, interactive: false })}
     </div>
   );
 }

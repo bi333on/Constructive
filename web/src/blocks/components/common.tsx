@@ -6,6 +6,8 @@ import { col } from "../types";
 
 export interface BlockRenderProps {
   props: BlockProps;
+  /** false в редакторе — ссылки и кнопки не интерактивны. */
+  interactive?: boolean;
 }
 
 /** Секция: применяет фон и цвет текста из props. */
@@ -47,27 +49,46 @@ export function Container({
   );
 }
 
-/** Кнопка блока (статичная визуальная кнопка). */
+/** Кнопка блока. Если задана ссылка — рендерится как <a>. */
 export function BlockButton({
   bg,
   fg,
   outline,
+  href,
+  interactive = true,
   children,
 }: {
   bg: string;
   fg: string;
   outline?: boolean;
+  href?: string;
+  interactive?: boolean;
   children: ReactNode;
 }) {
+  const cls =
+    "inline-flex items-center justify-center rounded-lg px-6 py-3 text-sm font-semibold";
+  const style = {
+    backgroundColor: outline ? "transparent" : bg,
+    color: fg,
+    border: outline ? `1px solid ${fg}` : undefined,
+  };
+
+  if (href && interactive) {
+    const external = /^https?:\/\//.test(href);
+    return (
+      <a
+        href={href}
+        className={cls}
+        style={style}
+        {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+      >
+        {children}
+      </a>
+    );
+  }
+
   return (
-    <span
-      className="inline-flex items-center justify-center rounded-lg px-6 py-3 text-sm font-semibold"
-      style={{
-        backgroundColor: outline ? "transparent" : bg,
-        color: fg,
-        border: outline ? `1px solid ${fg}` : undefined,
-      }}
-    >
+    <span className={cls} style={style}>
       {children}
     </span>
   );

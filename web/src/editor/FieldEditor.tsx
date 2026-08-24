@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { AlignCenter, AlignLeft, AlignRight, Upload } from "lucide-react";
+import { AlignCenter, AlignLeft, AlignRight, Link, Upload } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { BlockField, ImageField } from "@/blocks/types";
 
@@ -133,6 +133,23 @@ function FieldControl({ field, value, onChange }: Props) {
           value={String(value ?? field.defaultValue ?? "")}
           onChange={(e) => onChange(e.target.value)}
         />
+      );
+
+    case "link":
+      return (
+        <div className="relative">
+          <Link
+            aria-hidden
+            className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400"
+          />
+          <input
+            type="text"
+            className={cn(inputCls, "pl-9")}
+            placeholder={field.placeholder ?? "https://example.com"}
+            value={String(value ?? field.defaultValue ?? "")}
+            onChange={(e) => onChange(e.target.value)}
+          />
+        </div>
       );
 
     case "image":

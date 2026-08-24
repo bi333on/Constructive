@@ -63,6 +63,12 @@ export interface AlignField extends FieldBase {
   defaultValue?: "left" | "center" | "right";
 }
 
+export interface LinkField extends FieldBase {
+  type: "link";
+  placeholder?: string;
+  defaultValue?: string;
+}
+
 export type BlockField =
   | TextField
   | TextareaField
@@ -71,7 +77,8 @@ export type BlockField =
   | NumberField
   | SelectField
   | ToggleField
-  | AlignField;
+  | AlignField
+  | LinkField;
 
 export type BlockProps = Record<string, unknown>;
 

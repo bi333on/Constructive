@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils";
 import { bool, col, num, str } from "../types";
 import { BlockButton, BlockImage, Container, Section, type BlockRenderProps } from "./common";
 
-export function HeaderBlock({ props }: BlockRenderProps) {
+export function HeaderBlock({ props, interactive }: BlockRenderProps) {
   const showButton = bool(props, "showButton", true);
   return (
     <header
@@ -15,7 +15,12 @@ export function HeaderBlock({ props }: BlockRenderProps) {
       <Container className="flex items-center justify-between gap-3 py-4">
         <span className="min-w-0 truncate text-lg font-bold">{str(props, "logo", "Логотип")}</span>
         {showButton && (
-          <BlockButton bg={col(props, "buttonColor", "#2563eb")} fg={col(props, "buttonTextColor", "#ffffff")}>
+          <BlockButton
+            bg={col(props, "buttonColor", "#2563eb")}
+            fg={col(props, "buttonTextColor", "#ffffff")}
+            href={str(props, "buttonUrl")}
+            interactive={interactive}
+          >
             {str(props, "buttonText", "Начать")}
           </BlockButton>
         )}
@@ -24,7 +29,7 @@ export function HeaderBlock({ props }: BlockRenderProps) {
   );
 }
 
-export function HeroBlock({ props }: BlockRenderProps) {
+export function HeroBlock({ props, interactive }: BlockRenderProps) {
   const align = str(props, "align", "center");
   const accent = col(props, "accent", "#2563eb");
   const textColor = col(props, "textColor", "#ffffff");
@@ -63,11 +68,17 @@ export function HeroBlock({ props }: BlockRenderProps) {
             align === "right" && "justify-end",
           )}
         >
-          <BlockButton bg={accent} fg="#ffffff">
+          <BlockButton bg={accent} fg="#ffffff" href={str(props, "primaryUrl")} interactive={interactive}>
             {str(props, "primaryText", "Начать")}
           </BlockButton>
           {showSecondary && (
-            <BlockButton bg="transparent" fg={textColor} outline>
+            <BlockButton
+              bg="transparent"
+              fg={textColor}
+              outline
+              href={str(props, "secondaryUrl")}
+              interactive={interactive}
+            >
               {str(props, "secondaryText", "Подробнее")}
             </BlockButton>
           )}
@@ -202,7 +213,7 @@ export function GalleryBlock({ props }: BlockRenderProps) {
   );
 }
 
-export function PricingBlock({ props }: BlockRenderProps) {
+export function PricingBlock({ props, interactive }: BlockRenderProps) {
   const accent = col(props, "accent", "#2563eb");
   const plans = [1, 2, 3].map((i) => ({
     name: str(props, `p${i}Name`),
@@ -238,7 +249,7 @@ export function PricingBlock({ props }: BlockRenderProps) {
                 ))}
               </ul>
               <div className="mt-6">
-                <BlockButton bg={accent} fg="#ffffff">
+                <BlockButton bg={accent} fg="#ffffff" href={str(props, "buttonUrl")} interactive={interactive}>
                   {str(props, "buttonText", "Выбрать")}
                 </BlockButton>
               </div>
@@ -273,14 +284,19 @@ export function FaqBlock({ props }: BlockRenderProps) {
   );
 }
 
-export function CtaBlock({ props }: BlockRenderProps) {
+export function CtaBlock({ props, interactive }: BlockRenderProps) {
   return (
     <Section props={props} className="py-20 text-center">
       <Container>
         <h2 className="text-3xl font-bold">{str(props, "title")}</h2>
         <p className="mt-3 opacity-80">{str(props, "subtitle")}</p>
         <div className="mt-8">
-          <BlockButton bg={col(props, "buttonColor", "#ffffff")} fg={col(props, "buttonTextColor", "#2563eb")}>
+          <BlockButton
+            bg={col(props, "buttonColor", "#ffffff")}
+            fg={col(props, "buttonTextColor", "#2563eb")}
+            href={str(props, "buttonUrl")}
+            interactive={interactive}
+          >
             {str(props, "buttonText", "Связаться")}
           </BlockButton>
         </div>
@@ -431,7 +447,7 @@ export function StepsBlock({ props }: BlockRenderProps) {
   );
 }
 
-export function ContactBlock({ props }: BlockRenderProps) {
+export function ContactBlock({ props, interactive }: BlockRenderProps) {
   const accent = col(props, "accent", "#2563eb");
   const rows = [
     { label: "Адрес", value: str(props, "address") },
@@ -452,7 +468,7 @@ export function ContactBlock({ props }: BlockRenderProps) {
           ))}
         </div>
         <div className="mt-8">
-          <BlockButton bg={accent} fg="#ffffff">
+          <BlockButton bg={accent} fg="#ffffff" href={str(props, "buttonUrl")} interactive={interactive}>
             {str(props, "buttonText", "Написать нам")}
           </BlockButton>
         </div>
