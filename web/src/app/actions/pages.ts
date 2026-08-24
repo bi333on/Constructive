@@ -80,10 +80,17 @@ export async function savePage(input: SavePageInput): Promise<ActionResult> {
     ).run(pageId, input.title, slug, input.description, blocksJson, now);
   }
 
-  // Версия для истории изменений.
-  db.prepare(
-    "INSERT INTO page_versions (id, page_id, title, blocks) VALUES (?, ?, ?, ?)",
-  ).run(newId(), pageId, input.title, blocksJson);
+  // Версия для истории изменений (пропускаем, если содержимое не изменилось).
+  const last = db
+    .prepare(
+      "SELECT title, blocks FROM page_versions WHERE page_id = ? ORDER BY created_at DESC, rowid DESC LIMIT 1",
+    )
+    .get(pageId) as unknown as { title: string; blocks: string } | undefined;
+  if (!last || last.blocks !== blocksJson || last.title !== input.title) {
+    db.prepare(
+      "INSERT INTO page_versions (id, page_id, title, blocks) VALUES (?, ?, ?, ?)",
+    ).run(newId(), pageId, input.title, blocksJson);
+  }
 
   return { id: pageId, slug };
 }
@@ -133,4 +140,39 @@ export async function deletePage(pageId: string): Promise<ActionResult> {
   db.prepare("DELETE FROM pages WHERE id = ?").run(pageId);
   revalidatePath("/dashboard");
   return {};
+}
+
+export interface PageVersion {
+  id: string;
+  title: string;
+  created_at: string;
+}
+
+export async function listVersions(
+  pageId: string,
+): Promise<ActionResult & { versions?: PageVersion[] }> {
+  const db = getDb();
+  const rows = db
+    .prepare(
+      "SELECT id, title, created_at FROM page_versions WHERE page_id = ? ORDER BY created_at DESC, rowid DESC LIMIT 50",
+    )
+    .all(pageId) as unknown as PageVersion[];
+  return { versions: rows };
+}
+
+export async function getVersion(
+  versionId: string,
+): Promise<
+  ActionResult & { version?: { title: string; blocks: BlockInstance[] } }
+> {
+  const db = getDb();
+  const row = db
+    .prepare("SELECT title, blocks FROM page_versions WHERE id = ?")
+    .get(versionId) as unknown as
+    | { title: string; blocks: string }
+    | undefined;
+  if (!row) return { error: "Версия не найдена" };
+  return {
+    version: { title: row.title, blocks: JSON.parse(row.blocks) as BlockInstance[] },
+  };
 }

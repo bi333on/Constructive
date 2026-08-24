@@ -36,11 +36,9 @@ CREATE TABLE IF NOT EXISTS published_pages (
 );
 `;
 
-function createDatabase(): DatabaseSync {
-  const dbPath =
-    process.env.DATABASE_PATH ?? path.join(process.cwd(), "data", "builder.db");
+/** Открывает (и при необходимости создаёт) БД по указанному пути. */
+export function openDatabase(dbPath: string): DatabaseSync {
   fs.mkdirSync(path.dirname(dbPath), { recursive: true });
-
   const db = new DatabaseSync(dbPath);
   db.exec("PRAGMA journal_mode = WAL;");
   db.exec("PRAGMA foreign_keys = ON;");
@@ -52,7 +50,9 @@ const globalForDb = globalThis as unknown as { __builderDb?: DatabaseSync };
 
 export function getDb(): DatabaseSync {
   if (!globalForDb.__builderDb) {
-    globalForDb.__builderDb = createDatabase();
+    const dbPath =
+      process.env.DATABASE_PATH ?? path.join(process.cwd(), "data", "builder.db");
+    globalForDb.__builderDb = openDatabase(dbPath);
   }
   return globalForDb.__builderDb;
 }

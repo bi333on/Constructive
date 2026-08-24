@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useStore } from "zustand";
 import { useEditorStore, temporalStore, useSaveStore } from "./store";
 import { cn } from "@/lib/utils";
+import { HistoryButton } from "./HistoryButton";
 import { PublishButton } from "./PublishButton";
 
 export function Toolbar({ onPreview }: { onPreview: () => void }) {
@@ -51,6 +52,8 @@ export function Toolbar({ onPreview }: { onPreview: () => void }) {
       >
         <FolderOpen className="h-4 w-4" />
       </Link>
+
+      <HistoryButton />
 
       <div className="flex items-center gap-1">
         <button
