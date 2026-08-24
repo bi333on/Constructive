@@ -12,8 +12,8 @@ export function HeaderBlock({ props }: BlockRenderProps) {
         color: col(props, "textColor", "#111827"),
       }}
     >
-      <Container className="flex items-center justify-between py-4">
-        <span className="text-lg font-bold">{str(props, "logo", "Логотип")}</span>
+      <Container className="flex items-center justify-between gap-3 py-4">
+        <span className="min-w-0 truncate text-lg font-bold">{str(props, "logo", "Логотип")}</span>
         {showButton && (
           <BlockButton bg={col(props, "buttonColor", "#2563eb")} fg={col(props, "buttonTextColor", "#ffffff")}>
             {str(props, "buttonText", "Начать")}

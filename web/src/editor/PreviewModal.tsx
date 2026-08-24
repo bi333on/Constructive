@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Monitor, Smartphone, Tablet, X } from "lucide-react";
-import { blockRegistry } from "@/blocks/registry";
+import { savePage } from "@/app/actions/pages";
 import { cn } from "@/lib/utils";
 import { useEditorStore } from "./store";
 
@@ -14,6 +14,10 @@ const deviceWidth: Record<Device, string> = {
   mobile: "375px",
 };
 
+/**
+ * Предпросмотр в iframe: у iframe собственный viewport, поэтому
+ * Tailwind-брейкпоинты (md:/lg:) корректно реагируют на ширину устройства.
+ */
 export function PreviewModal({
   open,
   onClose,
@@ -21,8 +25,36 @@ export function PreviewModal({
   open: boolean;
   onClose: () => void;
 }) {
-  const blocks = useEditorStore((s) => s.page.blocks);
+  const pageId = useEditorStore((s) => s.pageId);
   const [device, setDevice] = useState<Device>("desktop");
+  const [previewId, setPreviewId] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  // При открытии гарантируем, что последняя версия сохранена в БД.
+  useEffect(() => {
+    if (!open) return;
+    (async () => {
+      let id = pageId;
+      if (!id) {
+        setSaving(true);
+        const state = useEditorStore.getState();
+        const res = await savePage({
+          title: state.page.title,
+          slug: state.page.slug,
+          description: state.page.description,
+          blocks: state.page.blocks,
+        });
+        if (res.error) {
+          setSaving(false);
+          return;
+        }
+        id = res.id!;
+        useEditorStore.getState().setPageId(id);
+      }
+      setPreviewId(id);
+      setSaving(false);
+    })();
+  }, [open, pageId]);
 
   useEffect(() => {
     if (!open) return;
@@ -75,23 +107,25 @@ export function PreviewModal({
         </button>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto px-4 py-8">
+      <div className="min-h-0 flex-1 overflow-y-auto px-4 py-6">
         <div
-          className="mx-auto overflow-hidden rounded-lg bg-white shadow-2xl transition-all duration-200"
-          style={{ width: deviceWidth[device], maxWidth: device === "desktop" ? "100%" : undefined }}
+          className="mx-auto h-[calc(100vh-9rem)] overflow-hidden rounded-lg bg-white shadow-2xl transition-all duration-200"
+          style={{
+            width: deviceWidth[device],
+            maxWidth: device === "desktop" ? "100%" : undefined,
+          }}
         >
-          {blocks.length === 0 ? (
-            <div className="flex h-96 items-center justify-center text-neutral-400">
-              Страница пуста
+          {saving || !previewId ? (
+            <div className="flex h-full items-center justify-center text-neutral-400">
+              Подготовка предпросмотра…
             </div>
           ) : (
-            blocks.map((block) => {
-              const reg = blockRegistry[block.type];
-              if (!reg) return null;
-              return (
-                <div key={block.id}>{reg.render({ props: block.props })}</div>
-              );
-            })
+            <iframe
+              key={previewId}
+              src={`/preview/${previewId}`}
+              title="Предпросмотр"
+              className="h-full w-full border-0"
+            />
           )}
         </div>
       </div>
