@@ -1,19 +1,26 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-// Бесплатные поддомены: <имя>.BASE_DOMAIN → /site/<имя>/<путь>.
-// Само приложение (редактор, дашборд) живёт на основном домене.
+// Маршрутизация сайтов по Host:
+// - <имя>.BASE_DOMAIN (бесплатный поддомен) и собственные домены → /site/<host>/<путь>
+// - основной домен → приложение (редактор, дашборд).
 export async function proxy(request: NextRequest) {
   const base = process.env.NEXT_PUBLIC_BASE_DOMAIN?.toLowerCase();
-  const host = (request.headers.get("host") ?? "").toLowerCase();
+  if (!base) return NextResponse.next({ request });
 
-  if (base && host.endsWith(`.${base}`)) {
-    const subdomain = host.slice(0, host.length - base.length - 1).toLowerCase();
-    if (subdomain && !["www", "app", "admin", "api"].includes(subdomain)) {
-      const url = request.nextUrl.clone();
-      url.pathname = `/site/${subdomain}${url.pathname === "/" ? "" : url.pathname}`;
-      url.search = "";
-      return NextResponse.rewrite(url);
-    }
+  let host = (request.headers.get("host") ?? "").toLowerCase();
+  if (host.includes(":")) host = host.slice(0, host.lastIndexOf(":"));
+
+  const isMain = host === base || host === `www.${base}`;
+  const isLocal =
+    host === "localhost" ||
+    host === "127.0.0.1" ||
+    /^\d{1,3}(\.\d{1,3}){3}$/.test(host);
+
+  if (!isMain && !isLocal) {
+    const url = request.nextUrl.clone();
+    url.pathname = `/site/${host}${url.pathname === "/" ? "" : url.pathname}`;
+    url.search = "";
+    return NextResponse.rewrite(url);
   }
 
   return NextResponse.next({ request });

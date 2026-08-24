@@ -8,7 +8,7 @@ import { getDb } from "@/lib/db";
 export const dynamic = "force-dynamic";
 
 interface Params {
-  subdomain: string;
+  host: string;
   path?: string[];
 }
 
@@ -23,12 +23,26 @@ type SiteData =
   | { kind: "notfound" }
   | { kind: "page"; title: string; description: string; blocks: BlockInstance[] };
 
-const getSiteData = cache(
-  async (subdomain: string, slug: string | null): Promise<SiteData> => {
-    const db = getDb();
-    const project = db
+function resolveProject(host: string): { id: string } | undefined {
+  const db = getDb();
+  const base = process.env.NEXT_PUBLIC_BASE_DOMAIN?.toLowerCase();
+
+  if (base && host.endsWith(`.${base}`)) {
+    const subdomain = host.slice(0, host.length - base.length - 1).toLowerCase();
+    return db
       .prepare("SELECT id FROM projects WHERE subdomain = ?")
       .get(subdomain) as unknown as { id: string } | undefined;
+  }
+
+  return db
+    .prepare("SELECT id FROM projects WHERE domain = ?")
+    .get(host) as unknown as { id: string } | undefined;
+}
+
+const getSiteData = cache(
+  async (host: string, slug: string | null): Promise<SiteData> => {
+    const db = getDb();
+    const project = resolveProject(host);
     if (!project) return { kind: "missing" };
 
     if (slug) {
@@ -74,10 +88,10 @@ export async function generateMetadata({
 }: {
   params: Promise<Params>;
 }): Promise<Metadata> {
-  const { subdomain, path } = await params;
-  const data = await getSiteData(subdomain, path?.[0] ?? null);
+  const { host, path } = await params;
+  const data = await getSiteData(host, path?.[0] ?? null);
   if (data.kind !== "page") return { title: "Страница не найдена" };
-  return { title: data.title || subdomain, description: data.description };
+  return { title: data.title || host, description: data.description };
 }
 
 export default async function SitePage({
@@ -85,8 +99,8 @@ export default async function SitePage({
 }: {
   params: Promise<Params>;
 }) {
-  const { subdomain, path } = await params;
-  const data = await getSiteData(subdomain, path?.[0] ?? null);
+  const { host, path } = await params;
+  const data = await getSiteData(host, path?.[0] ?? null);
   if (data.kind !== "page") notFound();
 
   return (

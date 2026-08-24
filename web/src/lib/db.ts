@@ -90,6 +90,9 @@ export function openDatabase(dbPath: string): DatabaseSync {
   db.exec(
     "CREATE INDEX IF NOT EXISTS pages_project_id_idx ON pages(project_id);",
   );
+
+  // Миграция: собственный домен проекта.
+  ensureColumn(db, "projects", "domain", "TEXT");
   return db;
 }
 

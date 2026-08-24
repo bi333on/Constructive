@@ -119,7 +119,18 @@ export function ProjectsClient({
                   </button>
                 )}
                 <div className="mt-0.5 truncate text-xs text-neutral-400">
-                  {baseDomain ? `${project.subdomain}.${baseDomain}` : project.subdomain}{" "}
+                  {project.domain ? (
+                    <>
+                      {project.domain} ·{" "}
+                      <span className="text-neutral-300">
+                        {baseDomain ? `${project.subdomain}.${baseDomain}` : project.subdomain}
+                      </span>
+                    </>
+                  ) : (
+                    baseDomain
+                      ? `${project.subdomain}.${baseDomain}`
+                      : project.subdomain
+                  )}{" "}
                   · {project.page_count} стр.
                 </div>
               </div>

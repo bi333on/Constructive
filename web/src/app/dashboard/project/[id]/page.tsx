@@ -15,13 +15,18 @@ export default async function ProjectPage({
   const user = await requireUser();
 
   const row = getDb()
-    .prepare("SELECT id, name, subdomain FROM projects WHERE id = ? AND user_id = ?")
+    .prepare("SELECT id, name, subdomain, domain FROM projects WHERE id = ? AND user_id = ?")
     .get(id, user.id) as unknown as
-    | { id: string; name: string; subdomain: string | null }
+    | { id: string; name: string; subdomain: string | null; domain: string | null }
     | undefined;
   if (!row) notFound();
 
-  const project = { id: row.id, name: row.name, subdomain: row.subdomain };
+  const project = {
+    id: row.id,
+    name: row.name,
+    subdomain: row.subdomain,
+    domain: row.domain,
+  };
   const { pages } = await listPages(id);
 
   return <ProjectClient project={project} pages={pages ?? []} />;

@@ -9,6 +9,7 @@ export interface ProjectRow {
   id: string;
   name: string;
   subdomain: string | null;
+  domain: string | null;
   page_count: number;
 }
 
@@ -19,7 +20,7 @@ export async function listProjects(): Promise<{
   const user = await requireUser();
   const rows = getDb()
     .prepare(
-      `SELECT p.id, p.name, p.subdomain,
+      `SELECT p.id, p.name, p.subdomain, p.domain,
          (SELECT COUNT(*) FROM pages pg WHERE pg.project_id = p.id) AS page_count
        FROM projects p
        WHERE p.user_id = ?
@@ -32,6 +33,7 @@ export async function listProjects(): Promise<{
       id: r.id,
       name: r.name,
       subdomain: r.subdomain,
+      domain: r.domain,
       page_count: r.page_count,
     })),
   };
@@ -88,6 +90,46 @@ export async function deleteProject(id: string): Promise<{ error?: string }> {
   db.prepare("DELETE FROM pages WHERE project_id = ? AND user_id = ?").run(id, user.id);
   db.prepare("DELETE FROM projects WHERE id = ? AND user_id = ?").run(id, user.id);
 
+  revalidatePath("/dashboard");
+  return {};
+}
+
+export async function setProjectDomain(
+  id: string,
+  domain: string,
+): Promise<{ error?: string }> {
+  const user = await requireUser();
+  const db = getDb();
+
+  const normalized = domain
+    .trim()
+    .toLowerCase()
+    .replace(/^https?:\/\//, "")
+    .replace(/\/.*$/, "");
+
+  if (!normalized) {
+    db.prepare("UPDATE projects SET domain = NULL WHERE id = ? AND user_id = ?").run(
+      id,
+      user.id,
+    );
+    revalidatePath("/dashboard");
+    return {};
+  }
+
+  if (!/^[a-z0-9-]+(\.[a-z0-9-]+)+\.[a-z]{2,}$/.test(normalized)) {
+    return { error: "Некорректный домен. Пример: example.com" };
+  }
+
+  const existing = db
+    .prepare("SELECT id FROM projects WHERE domain = ? AND id != ?")
+    .get(normalized, id);
+  if (existing) return { error: "Этот домен уже используется" };
+
+  db.prepare("UPDATE projects SET domain = ? WHERE id = ? AND user_id = ?").run(
+    normalized,
+    id,
+    user.id,
+  );
   revalidatePath("/dashboard");
   return {};
 }

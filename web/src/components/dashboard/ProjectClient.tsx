@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, ExternalLink, Globe, Pencil, Plus, Trash2 } from "lucide-react";
+import { setProjectDomain } from "@/app/actions/projects";
 import {
   createPage,
   deletePage,
@@ -16,12 +17,18 @@ export function ProjectClient({
   project,
   pages,
 }: {
-  project: { id: string; name: string; subdomain: string | null };
+  project: {
+    id: string;
+    name: string;
+    subdomain: string | null;
+    domain: string | null;
+  };
   pages: PageListItem[];
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const [domain, setDomain] = useState(project.domain ?? "");
 
   const baseDomain = process.env.NEXT_PUBLIC_BASE_DOMAIN;
 
@@ -73,6 +80,40 @@ export function ProjectClient({
             <Plus className="h-4 w-4" /> Новая страница
           </button>
         </header>
+
+        <section className="mb-6 rounded-xl border border-neutral-200 bg-white p-4">
+          <h2 className="text-sm font-semibold text-neutral-800">Домены</h2>
+          <p className="mt-1 text-xs text-neutral-500">
+            Бесплатный:{" "}
+            <span className="font-medium text-neutral-700">
+              {baseDomain ? `${project.subdomain}.${baseDomain}` : project.subdomain}
+            </span>
+          </p>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              run(() => setProjectDomain(project.id, domain));
+            }}
+            className="mt-3 flex gap-2"
+          >
+            <input
+              value={domain}
+              onChange={(e) => setDomain(e.target.value)}
+              placeholder="example.com (свой домен)"
+              className="w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+            />
+            <button
+              type="submit"
+              disabled={isPending}
+              className="shrink-0 rounded-lg border border-neutral-300 px-3 py-2 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-100 disabled:opacity-50"
+            >
+              Сохранить
+            </button>
+          </form>
+          <p className="mt-2 text-xs text-neutral-400">
+            Для своего домена укажите A-запись на IP сервера. Сертификат выпустится автоматически.
+          </p>
+        </section>
 
         {error && (
           <p className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-600">{error}</p>
