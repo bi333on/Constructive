@@ -2,26 +2,25 @@
 set -euo pipefail
 
 # ============================================================
-# Автоустановка конструктора сайтов на Ubuntu 24.04
-# Использование: sudo ./install.sh example.com [email]
+# Автоустановка конструктора сайтов на Ubuntu 24.04 (Caddy + HTTPS)
+# Использование: sudo ./install.sh example.com
 # ============================================================
 
 DOMAIN="${1:-}"
-EMAIL="${2:-}"
 REPO="https://github.com/bi333on/Constructive.git"
 APP_DIR="/opt/builder"
 APP_USER="builder"
 PORT="3000"
 
 if [ -z "$DOMAIN" ]; then
-  echo "Использование: sudo ./install.sh example.com [email]"
+  echo "Использование: sudo ./install.sh example.com"
   exit 1
 fi
 
 echo "==> [1/8] Установка системных пакетов"
 apt-get update -y
 DEBIAN_FRONTEND=noninteractive apt-get install -y \
-  curl git ca-certificates gnupg nginx certbot python3-certbot-nginx
+  curl git ca-certificates gnupg debian-keyring debian-archive-keyring apt-transport-https
 
 echo "==> [2/8] Установка Node.js 22 LTS"
 if ! command -v node >/dev/null 2>&1; then
@@ -62,24 +61,25 @@ cp "$APP_DIR/deploy/builder.service" /etc/systemd/system/builder.service
 systemctl daemon-reload
 systemctl enable --now builder
 
-echo "==> [8/8] Настройка Nginx и SSL"
-sed "s/__DOMAIN__/$DOMAIN/g; s/__PORT__/$PORT/g" \
-  "$APP_DIR/deploy/nginx.conf" > /etc/nginx/sites-available/builder
-ln -sf /etc/nginx/sites-available/builder /etc/nginx/sites-enabled/builder
-rm -f /etc/nginx/sites-enabled/default
-nginx -t && systemctl reload nginx
+echo "==> [8/8] Установка Caddy и настройка HTTPS"
+# Официальный репозиторий Caddy
+curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' \
+  | gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
+curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' \
+  | tee /etc/apt/sources.list.d/caddy-stable.list
+apt-get update -y
+DEBIAN_FRONTEND=noninteractive apt-get install -y caddy
 
-if [ -n "$EMAIL" ]; then
-  certbot --nginx -d "$DOMAIN" --non-interactive --agree-tos -m "$EMAIL" --redirect
-else
-  certbot --nginx -d "$DOMAIN" --non-interactive --agree-tos \
-    --register-unsafely-without-email --redirect
-fi
+sed "s/__DOMAIN__/$DOMAIN/g; s/__PORT__/$PORT/g" \
+  "$APP_DIR/deploy/Caddyfile" > /etc/caddy/Caddyfile
+
+caddy validate --config /etc/caddy/Caddyfile
+systemctl enable --now caddy
 
 systemctl restart builder
 
 echo ""
 echo "=============================================="
-echo "Готово! Конструктор:  https://$DOMAIN"
-echo "Дашборд страниц:      https://$DOMAIN/dashboard"
+echo "Готово! Конструктор: https://$DOMAIN"
+echo "Дашборд страниц:    https://$DOMAIN/dashboard"
 echo "=============================================="

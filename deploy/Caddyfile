@@ -1,0 +1,6 @@
+# Caddy: автоматический HTTPS + реверс-прокси на Next.js
+# (заполняется install.sh: __DOMAIN__ и __PORT__)
+__DOMAIN__ {
+    reverse_proxy 127.0.0.1:__PORT__
+    encode gzip
+}

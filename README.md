@@ -26,10 +26,10 @@ npm run dev
 ```bash
 git clone https://github.com/bi333on/Constructive.git
 cd Constructive
-sudo ./deploy/install.sh example.com you@example.com
+sudo ./deploy/install.sh example.com
 ```
 
 ## Структура
 - `web/` — приложение Next.js.
-- `deploy/` — автоустановка (systemd + Nginx + Let's Encrypt).
+- `deploy/` — автоустановка (systemd + Caddy с авто-HTTPS).
 - `supabase/migrations/` — SQL-схема (заготовка для будущего перехода на Postgres/Supabase).
