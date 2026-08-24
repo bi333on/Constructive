@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { blockRegistry } from "@/blocks/registry";
+import { BlockList } from "@/components/BlockList";
 import type { BlockInstance } from "@/blocks/types";
 import { requireUser } from "@/lib/auth-session";
 import { getDb } from "@/lib/db";
@@ -27,11 +27,7 @@ export default async function PreviewPage({
 
   return (
     <main className="bg-white">
-      {blocks.map((block) => {
-        const reg = blockRegistry[block.type];
-        if (!reg) return null;
-        return <div key={block.id}>{reg.render({ props: block.props })}</div>;
-      })}
+      <BlockList blocks={blocks} />
     </main>
   );
 }

@@ -4,3 +4,12 @@ __DOMAIN__ {
     reverse_proxy 127.0.0.1:__PORT__
     encode gzip
 }
+
+# Бесплатные поддомены <имя>.__DOMAIN__ (нужна wildcard A-запись *.DOMAIN → IP)
+*.__DOMAIN__ {
+    tls {
+        on_demand
+    }
+    reverse_proxy 127.0.0.1:__PORT__
+    encode gzip
+}

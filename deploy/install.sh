@@ -43,6 +43,7 @@ fi
 echo "==> [5/8] Настройка окружения и папки данных"
 cat > "$APP_DIR/web/.env.local" <<EOF
 NEXT_PUBLIC_SITE_URL=https://$DOMAIN
+NEXT_PUBLIC_BASE_DOMAIN=$DOMAIN
 DATABASE_PATH=/var/lib/builder/builder.db
 UPLOADS_DIR=/var/lib/builder/uploads
 EOF

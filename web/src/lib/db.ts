@@ -47,6 +47,14 @@ CREATE TABLE IF NOT EXISTS sessions (
   user_id TEXT NOT NULL,
   expires_at TEXT NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS projects (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  name TEXT NOT NULL,
+  subdomain TEXT UNIQUE,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
 `;
 
 function ensureColumn(
@@ -75,6 +83,12 @@ export function openDatabase(dbPath: string): DatabaseSync {
   ensureColumn(db, "pages", "user_id", "TEXT");
   db.exec(
     "CREATE INDEX IF NOT EXISTS pages_user_id_idx ON pages(user_id);",
+  );
+
+  // Миграция: привязка страниц к проектам.
+  ensureColumn(db, "pages", "project_id", "TEXT");
+  db.exec(
+    "CREATE INDEX IF NOT EXISTS pages_project_id_idx ON pages(project_id);",
   );
   return db;
 }

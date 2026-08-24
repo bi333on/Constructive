@@ -49,7 +49,7 @@ export function Toolbar({ onPreview }: { onPreview: () => void }) {
 
       <Link
         href="/dashboard"
-        title="Мои страницы"
+        title="Мои проекты"
         className="rounded-lg p-2 text-neutral-600 transition-colors hover:bg-neutral-100"
       >
         <FolderOpen className="h-4 w-4" />

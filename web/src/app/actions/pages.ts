@@ -55,15 +55,50 @@ export async function getPage(id: string): Promise<ActionResult> {
   return { page: rowToPage(row) };
 }
 
-export async function createPage(): Promise<ActionResult> {
+export async function createPage(projectId?: string): Promise<ActionResult> {
   const user = await requireUser();
   const db = getDb();
   const id = newId();
   db.prepare(
-    "INSERT INTO pages (id, title, user_id) VALUES (?, 'Новая страница', ?)",
-  ).run(id, user.id);
+    "INSERT INTO pages (id, title, user_id, project_id) VALUES (?, 'Новая страница', ?, ?)",
+  ).run(id, user.id, projectId ?? null);
   revalidatePath("/dashboard");
   return { id };
+}
+
+export interface PageListItem {
+  id: string;
+  title: string;
+  slug: string | null;
+  published: boolean;
+  updated_at: string;
+}
+
+export async function listPages(
+  projectId: string,
+): Promise<ActionResult & { pages?: PageListItem[] }> {
+  const user = await requireUser();
+  const rows = getDb()
+    .prepare(
+      "SELECT id, title, slug, published, updated_at FROM pages WHERE project_id = ? AND user_id = ? ORDER BY updated_at DESC",
+    )
+    .all(projectId, user.id) as unknown as {
+    id: string;
+    title: string;
+    slug: string | null;
+    published: number;
+    updated_at: string;
+  }[];
+
+  return {
+    pages: rows.map((r) => ({
+      id: r.id,
+      title: r.title,
+      slug: r.slug,
+      published: !!r.published,
+      updated_at: r.updated_at,
+    })),
+  };
 }
 
 export async function savePage(input: SavePageInput): Promise<ActionResult> {
@@ -172,7 +207,13 @@ export async function listVersions(
       "SELECT id, title, created_at FROM page_versions WHERE page_id = ? ORDER BY created_at DESC, rowid DESC LIMIT 50",
     )
     .all(pageId) as unknown as PageVersion[];
-  return { versions: rows };
+  return {
+    versions: rows.map((r) => ({
+      id: r.id,
+      title: r.title,
+      created_at: r.created_at,
+    })),
+  };
 }
 
 export async function getVersion(
