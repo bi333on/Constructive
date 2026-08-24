@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { Fragment, useState, type ReactNode } from "react";
 import {
   DndContext,
   PointerSensor,
@@ -22,6 +22,7 @@ import {
   GripVertical,
   Plus,
   Trash2,
+  X,
 } from "lucide-react";
 import { blockRegistry } from "@/blocks/registry";
 import type { BlockInstance } from "@/blocks/types";
@@ -58,22 +59,18 @@ function ToolButton({
 function BlockItem({ block }: { block: BlockInstance }) {
   const selected = useEditorStore((s) => s.selectedId === block.id);
   const hovered = useEditorStore((s) => s.hoveredId === block.id);
-  const index = useEditorStore((s) => s.page.blocks.findIndex((b) => b.id === block.id));
 
   const select = useEditorStore((s) => s.select);
   const hover = useEditorStore((s) => s.hover);
   const duplicateBlock = useEditorStore((s) => s.duplicateBlock);
   const removeBlock = useEditorStore((s) => s.removeBlock);
   const moveBlockBy = useEditorStore((s) => s.moveBlockBy);
-  const addBlock = useEditorStore((s) => s.addBlock);
-
-  const [pickerOpen, setPickerOpen] = useState(false);
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: block.id });
 
   const reg = blockRegistry[block.type];
-  const visible = selected || hovered || pickerOpen;
+  const visible = selected || hovered;
 
   return (
     <div
@@ -109,9 +106,6 @@ function BlockItem({ block }: { block: BlockInstance }) {
             <ToolButton title="Дублировать" onClick={(e) => { e.stopPropagation(); duplicateBlock(block.id); }}>
               <Copy className="h-4 w-4" />
             </ToolButton>
-            <ToolButton title="Вставить блок после" onClick={(e) => { e.stopPropagation(); setPickerOpen((v) => !v); }}>
-              <Plus className="h-4 w-4" />
-            </ToolButton>
             <ToolButton danger title="Удалить" onClick={(e) => { e.stopPropagation(); removeBlock(block.id); }}>
               <Trash2 className="h-4 w-4" />
             </ToolButton>
@@ -122,30 +116,6 @@ function BlockItem({ block }: { block: BlockInstance }) {
             >
               <GripVertical className="h-4 w-4" />
             </div>
-          </div>
-        </>
-      )}
-
-      {pickerOpen && (
-        <>
-          <div
-            className="fixed inset-0 z-40"
-            onClick={(e) => {
-              e.stopPropagation();
-              setPickerOpen(false);
-            }}
-          />
-          <div
-            className="absolute left-3 top-8 z-50 w-72 rounded-xl border border-neutral-200 bg-white p-2 shadow-xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="px-2 py-1 text-xs font-medium text-neutral-400">Вставить блок</div>
-            <BlockPicker
-              onPick={(type) => {
-                addBlock(type, index + 1);
-                setPickerOpen(false);
-              }}
-            />
           </div>
         </>
       )}
@@ -184,27 +154,21 @@ function EmptyCanvas() {
   );
 }
 
-function AddBlockFooter() {
-  const addBlock = useEditorStore((s) => s.addBlock);
-  const [open, setOpen] = useState(false);
-
+function InsertDivider({ onInsert }: { onInsert: () => void }) {
   return (
-    <div className="relative mt-4 flex justify-center">
+    <div className="group relative flex h-7 items-center justify-center">
+      <div className="absolute inset-x-0 top-1/2 h-0.5 -translate-y-1/2 rounded-full bg-blue-500 opacity-0 transition-opacity group-hover:opacity-100" />
       <button
         type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-2 rounded-full border border-dashed border-neutral-300 px-5 py-2 text-sm font-medium text-neutral-500 transition-colors hover:border-blue-400 hover:text-blue-600"
+        title="Добавить блок"
+        onClick={(e) => {
+          e.stopPropagation();
+          onInsert();
+        }}
+        className="relative z-10 flex h-7 w-7 scale-75 items-center justify-center rounded-full bg-blue-600 text-white opacity-0 shadow-md transition-all duration-150 hover:bg-blue-700 group-hover:scale-100 group-hover:opacity-100"
       >
-        <Plus className="h-4 w-4" /> Добавить блок
+        <Plus className="h-4 w-4" />
       </button>
-      {open && (
-        <>
-          <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-          <div className="absolute bottom-12 left-1/2 z-50 w-80 -translate-x-1/2 rounded-xl border border-neutral-200 bg-white p-3 shadow-xl">
-            <BlockPicker onPick={(type) => { addBlock(type); setOpen(false); }} columns={2} />
-          </div>
-        </>
-      )}
     </div>
   );
 }
@@ -213,6 +177,9 @@ export function BlockCanvas() {
   const blocks = useEditorStore((s) => s.page.blocks);
   const select = useEditorStore((s) => s.select);
   const moveBlock = useEditorStore((s) => s.moveBlock);
+  const addBlock = useEditorStore((s) => s.addBlock);
+
+  const [insertAt, setInsertAt] = useState<number | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -225,6 +192,12 @@ export function BlockCanvas() {
     }
   };
 
+  const closePicker = () => setInsertAt(null);
+  const pick = (type: string) => {
+    addBlock(type, insertAt ?? blocks.length);
+    setInsertAt(null);
+  };
+
   return (
     <div
       className="mx-auto w-full max-w-5xl px-4 py-6"
@@ -235,21 +208,43 @@ export function BlockCanvas() {
       {blocks.length === 0 ? (
         <EmptyCanvas />
       ) : (
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext items={blocks.map((b) => b.id)} strategy={verticalListSortingStrategy}>
+            <div>
+              {blocks.map((block, i) => (
+                <Fragment key={block.id}>
+                  <InsertDivider onInsert={() => setInsertAt(i)} />
+                  <BlockItem block={block} />
+                </Fragment>
+              ))}
+            </div>
+          </SortableContext>
+          <InsertDivider onInsert={() => setInsertAt(blocks.length)} />
+        </DndContext>
+      )}
+
+      {insertAt !== null && (
         <>
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragEnd={handleDragEnd}
-          >
-            <SortableContext items={blocks.map((b) => b.id)} strategy={verticalListSortingStrategy}>
-              <div className="space-y-3">
-                {blocks.map((block) => (
-                  <BlockItem key={block.id} block={block} />
-                ))}
-              </div>
-            </SortableContext>
-          </DndContext>
-          <AddBlockFooter />
+          <div className="fixed inset-0 z-40 bg-neutral-950/30" onClick={closePicker} />
+          <aside className="fixed inset-y-0 left-0 z-50 flex w-72 flex-col bg-white shadow-2xl">
+            <header className="flex items-center justify-between border-b border-neutral-200 px-4 py-3">
+              <span className="text-sm font-semibold text-neutral-800">Добавить блок</span>
+              <button
+                type="button"
+                onClick={closePicker}
+                className="rounded p-1 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </header>
+            <div className="flex-1 overflow-y-auto p-3">
+              <BlockPicker columns={2} onPick={pick} />
+            </div>
+          </aside>
         </>
       )}
     </div>
