@@ -37,6 +37,9 @@ yarn-error.log*
 # локальная БД SQLite
 /data
 
+# загруженные пользователем изображения
+/public/uploads
+
 # vercel
 .vercel
 

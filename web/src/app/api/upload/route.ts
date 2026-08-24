@@ -2,8 +2,9 @@ import fs from "node:fs";
 import path from "node:path";
 import { NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/auth-session";
+import { uploadsDir } from "@/lib/uploads";
 
-// Загрузка изображений с диска (хранятся в public/uploads).
+// Загрузка изображений с диска (хранятся в data/uploads или UPLOADS_DIR).
 
 const MAX_SIZE = 5 * 1024 * 1024; // 5 МБ
 
@@ -42,7 +43,7 @@ export async function POST(request: Request) {
 
   const ext = EXT[file.type];
   const name = `${crypto.randomUUID()}.${ext}`;
-  const dir = path.join(process.cwd(), "public", "uploads");
+  const dir = uploadsDir();
   fs.mkdirSync(dir, { recursive: true });
 
   const bytes = Buffer.from(await file.arrayBuffer());
