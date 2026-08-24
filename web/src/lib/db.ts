@@ -34,7 +34,34 @@ CREATE TABLE IF NOT EXISTS published_pages (
   published_at TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
+
+CREATE TABLE IF NOT EXISTS users (
+  id TEXT PRIMARY KEY,
+  email TEXT NOT NULL UNIQUE,
+  password_hash TEXT NOT NULL,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS sessions (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  expires_at TEXT NOT NULL
+);
 `;
+
+function ensureColumn(
+  db: DatabaseSync,
+  table: string,
+  column: string,
+  definition: string,
+) {
+  const cols = db
+    .prepare(`PRAGMA table_info(${table})`)
+    .all() as unknown as { name: string }[];
+  if (!cols.some((c) => c.name === column)) {
+    db.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`);
+  }
+}
 
 /** Открывает (и при необходимости создаёт) БД по указанному пути. */
 export function openDatabase(dbPath: string): DatabaseSync {
@@ -43,6 +70,12 @@ export function openDatabase(dbPath: string): DatabaseSync {
   db.exec("PRAGMA journal_mode = WAL;");
   db.exec("PRAGMA foreign_keys = ON;");
   db.exec(SCHEMA);
+
+  // Миграция: добавляем владельца к страницам (для уже существующих БД).
+  ensureColumn(db, "pages", "user_id", "TEXT");
+  db.exec(
+    "CREATE INDEX IF NOT EXISTS pages_user_id_idx ON pages(user_id);",
+  );
   return db;
 }
 

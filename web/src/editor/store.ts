@@ -28,6 +28,8 @@ export interface EditorState {
   setPageId: (pageId: string | null) => void;
   /** Загружает страницу целиком (из облака) с id записи. */
   loadPage: (page: PageData, pageId: string | null) => void;
+  /** Заменяет все блоки страницы (загрузка шаблона). */
+  setBlocks: (blocks: BlockInstance[]) => void;
 }
 
 export const emptyPage = (): PageData => ({
@@ -141,6 +143,9 @@ export const useEditorStore = create<EditorState>()(
 
       loadPage: (page, pageId) =>
         set({ page, pageId, selectedId: null, hoveredId: null }),
+
+      setBlocks: (blocks) =>
+        set((state) => ({ page: { ...state.page, blocks }, selectedId: null })),
     }),
     {
       // В историю попадают только изменения страницы, но не выделение/ховер.

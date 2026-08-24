@@ -1,24 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
+import { signIn, signUp } from "@/app/actions/auth";
 
 export function AuthForm({ mode }: { mode: "login" | "signup" }) {
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-
-  if (!isSupabaseConfigured()) {
-    return (
-      <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
-        Supabase ещё не настроен. Добавьте <code>NEXT_PUBLIC_SUPABASE_URL</code> и{" "}
-        <code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code> в <code>.env.local</code>.
-      </div>
-    );
-  }
 
   const isSignup = mode === "signup";
 
@@ -26,17 +15,10 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
     e.preventDefault();
     setError(null);
     setLoading(true);
-    const supabase = createClient();
-    const { error: authError } = isSignup
-      ? await supabase.auth.signUp({ email, password })
-      : await supabase.auth.signInWithPassword({ email, password });
+    const res = await (isSignup ? signUp : signIn)(email, password);
     setLoading(false);
-    if (authError) {
-      setError(authError.message);
-      return;
-    }
-    router.push("/");
-    router.refresh();
+    if (res?.error) setError(res.error);
+    // при успехе выполняется redirect("/")
   };
 
   return (

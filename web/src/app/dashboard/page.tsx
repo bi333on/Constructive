@@ -1,3 +1,4 @@
+import { requireUser } from "@/lib/auth-session";
 import { getDb } from "@/lib/db";
 import {
   DashboardClient,
@@ -14,13 +15,14 @@ interface Row {
   updated_at: string;
 }
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  const user = await requireUser();
   const db = getDb();
   const rows = db
     .prepare(
-      "SELECT id, title, slug, published, updated_at FROM pages ORDER BY updated_at DESC",
+      "SELECT id, title, slug, published, updated_at FROM pages WHERE user_id = ? ORDER BY updated_at DESC",
     )
-    .all() as unknown as Row[];
+    .all(user.id) as unknown as Row[];
 
   const pages: DashboardPageRow[] = rows.map((r) => ({
     id: r.id,
@@ -30,5 +32,5 @@ export default function DashboardPage() {
     updated_at: r.updated_at,
   }));
 
-  return <DashboardClient initialPages={pages} />;
+  return <DashboardClient initialPages={pages} email={user.email} />;
 }

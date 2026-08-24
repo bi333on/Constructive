@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ExternalLink, Globe, Pencil, Plus, Trash2 } from "lucide-react";
+import { ExternalLink, Globe, LogOut, Pencil, Plus, Trash2 } from "lucide-react";
 import {
   createPage,
   deletePage,
@@ -11,6 +11,7 @@ import {
   unpublishPage,
   type ActionResult,
 } from "@/app/actions/pages";
+import { signOut } from "@/app/actions/auth";
 
 export interface DashboardPageRow {
   id: string;
@@ -22,8 +23,10 @@ export interface DashboardPageRow {
 
 export function DashboardClient({
   initialPages,
+  email,
 }: {
   initialPages: DashboardPageRow[];
+  email?: string;
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -44,17 +47,26 @@ export function DashboardClient({
           <div>
             <h1 className="text-xl font-bold text-neutral-900">Мои страницы</h1>
             <p className="mt-1 text-sm text-neutral-500">
-              Создавайте и публикуйте страницы.
+              {email ? `${email} · ` : ""}Создавайте и публикуйте страницы.
             </p>
           </div>
-          <button
-            type="button"
-            disabled={isPending}
-            onClick={() => run(createPage)}
-            className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
-          >
-            <Plus className="h-4 w-4" /> Новая страница
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => signOut()}
+              className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-neutral-600 transition-colors hover:bg-neutral-100"
+            >
+              <LogOut className="h-4 w-4" /> Выйти
+            </button>
+            <button
+              type="button"
+              disabled={isPending}
+              onClick={() => run(createPage)}
+              className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
+            >
+              <Plus className="h-4 w-4" /> Новая страница
+            </button>
+          </div>
         </header>
 
         {error && (

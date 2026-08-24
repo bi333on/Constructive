@@ -310,3 +310,153 @@ export function FooterBlock({ props }: BlockRenderProps) {
     </footer>
   );
 }
+
+export function StatsBlock({ props }: BlockRenderProps) {
+  const accent = col(props, "accent", "#2563eb");
+  const items = [1, 2, 3].map((i) => ({
+    value: str(props, `s${i}Value`),
+    label: str(props, `s${i}Label`),
+  }));
+
+  return (
+    <Section props={props} className="py-16 text-center">
+      <Container>
+        <h2 className="text-3xl font-bold">{str(props, "title")}</h2>
+        <div className="mt-10 grid gap-8 md:grid-cols-3">
+          {items.map((it, i) => (
+            <div key={i}>
+              <div className="text-4xl font-bold" style={{ color: accent }}>
+                {it.value}
+              </div>
+              <div className="mt-2 text-sm opacity-75">{it.label}</div>
+            </div>
+          ))}
+        </div>
+      </Container>
+    </Section>
+  );
+}
+
+export function TestimonialsBlock({ props }: BlockRenderProps) {
+  const accent = col(props, "accent", "#2563eb");
+  const items = [1, 2, 3].map((i) => ({
+    text: str(props, `t${i}Text`),
+    name: str(props, `t${i}Name`),
+    role: str(props, `t${i}Role`),
+  }));
+
+  return (
+    <Section props={props} className="py-20">
+      <Container>
+        <h2 className="text-center text-3xl font-bold">{str(props, "title")}</h2>
+        <div className="mt-12 grid gap-6 md:grid-cols-3">
+          {items.map((it, i) => (
+            <div key={i} className="rounded-2xl border border-neutral-200 p-6">
+              <div className="text-2xl" style={{ color: accent }}>“</div>
+              <p className="mt-2 text-sm opacity-80">{it.text}</p>
+              <div className="mt-4 border-t border-neutral-200 pt-3">
+                <div className="font-semibold">{it.name}</div>
+                <div className="text-xs opacity-60">{it.role}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </Container>
+    </Section>
+  );
+}
+
+export function TeamBlock({ props }: BlockRenderProps) {
+  const accent = col(props, "accent", "#2563eb");
+  const members = [1, 2, 3].map((i) => ({
+    name: str(props, `m${i}Name`),
+    role: str(props, `m${i}Role`),
+  }));
+
+  return (
+    <Section props={props} className="py-20">
+      <Container>
+        <h2 className="text-center text-3xl font-bold">{str(props, "title")}</h2>
+        <div className="mt-12 grid gap-8 md:grid-cols-3">
+          {members.map((m, i) => (
+            <div key={i} className="text-center">
+              <div
+                className="mx-auto flex h-24 w-24 items-center justify-center rounded-full text-2xl font-bold text-white"
+                style={{ backgroundColor: accent }}
+              >
+                {m.name
+                  .split(" ")
+                  .map((w) => w[0])
+                  .slice(0, 2)
+                  .join("")
+                  .toUpperCase()}
+              </div>
+              <div className="mt-4 font-semibold">{m.name}</div>
+              <div className="mt-1 text-sm opacity-60">{m.role}</div>
+            </div>
+          ))}
+        </div>
+      </Container>
+    </Section>
+  );
+}
+
+export function StepsBlock({ props }: BlockRenderProps) {
+  const accent = col(props, "accent", "#2563eb");
+  const steps = [1, 2, 3].map((i) => ({
+    title: str(props, `st${i}Title`),
+    text: str(props, `st${i}Text`),
+  }));
+
+  return (
+    <Section props={props} className="py-20">
+      <Container>
+        <h2 className="text-center text-3xl font-bold">{str(props, "title")}</h2>
+        <div className="mt-12 grid gap-8 md:grid-cols-3">
+          {steps.map((s, i) => (
+            <div key={i} className="relative rounded-2xl border border-neutral-200 p-6">
+              <div
+                className="flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold text-white"
+                style={{ backgroundColor: accent }}
+              >
+                {i + 1}
+              </div>
+              <h3 className="mt-4 text-lg font-semibold">{s.title}</h3>
+              <p className="mt-2 text-sm opacity-75">{s.text}</p>
+            </div>
+          ))}
+        </div>
+      </Container>
+    </Section>
+  );
+}
+
+export function ContactBlock({ props }: BlockRenderProps) {
+  const accent = col(props, "accent", "#2563eb");
+  const rows = [
+    { label: "Адрес", value: str(props, "address") },
+    { label: "Телефон", value: str(props, "phone") },
+    { label: "Email", value: str(props, "email") },
+  ];
+
+  return (
+    <Section props={props} className="py-20">
+      <Container className="max-w-3xl text-center">
+        <h2 className="text-3xl font-bold">{str(props, "title")}</h2>
+        <div className="mt-10 space-y-3">
+          {rows.map((r) => (
+            <div key={r.label} className="rounded-xl border border-neutral-200 p-4">
+              <div className="text-xs uppercase tracking-wide opacity-60">{r.label}</div>
+              <div className="mt-1 font-medium">{r.value}</div>
+            </div>
+          ))}
+        </div>
+        <div className="mt-8">
+          <BlockButton bg={accent} fg="#ffffff">
+            {str(props, "buttonText", "Написать нам")}
+          </BlockButton>
+        </div>
+      </Container>
+    </Section>
+  );
+}

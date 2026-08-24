@@ -1,12 +1,14 @@
 "use client";
 
-import { FolderOpen, Redo2, Undo2 } from "lucide-react";
+import { FolderOpen, LogOut, Redo2, Undo2 } from "lucide-react";
 import Link from "next/link";
 import { useStore } from "zustand";
+import { signOut } from "@/app/actions/auth";
 import { useEditorStore, temporalStore, useSaveStore } from "./store";
 import { cn } from "@/lib/utils";
 import { HistoryButton } from "./HistoryButton";
 import { PublishButton } from "./PublishButton";
+import { TemplatesButton } from "./TemplatesButton";
 
 export function Toolbar({ onPreview }: { onPreview: () => void }) {
   const title = useEditorStore((s) => s.page.title);
@@ -53,6 +55,8 @@ export function Toolbar({ onPreview }: { onPreview: () => void }) {
         <FolderOpen className="h-4 w-4" />
       </Link>
 
+      <TemplatesButton />
+
       <HistoryButton />
 
       <div className="flex items-center gap-1">
@@ -90,6 +94,15 @@ export function Toolbar({ onPreview }: { onPreview: () => void }) {
         className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
       >
         Предпросмотр
+      </button>
+
+      <button
+        type="button"
+        title="Выйти"
+        onClick={() => signOut()}
+        className="rounded-lg p-2 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-neutral-700"
+      >
+        <LogOut className="h-4 w-4" />
       </button>
     </header>
   );

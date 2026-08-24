@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import type { BlockInstance, PageData } from "@/blocks/types";
+import { requireUser } from "@/lib/auth-session";
 import { getDb, newId } from "@/lib/db";
 import { slugify } from "@/lib/utils";
 
@@ -40,26 +41,33 @@ function rowToPage(row: PageRow): PageData {
   };
 }
 
+/** Возвращает страницу, принадлежащую текущему пользователю (или null). */
+function ownPage(db: ReturnType<typeof getDb>, userId: string, pageId: string) {
+  return db
+    .prepare("SELECT * FROM pages WHERE id = ? AND user_id = ?")
+    .get(pageId, userId) as unknown as PageRow | undefined;
+}
+
 export async function getPage(id: string): Promise<ActionResult> {
-  const db = getDb();
-  const row = db
-    .prepare("SELECT * FROM pages WHERE id = ?")
-    .get(id) as unknown as PageRow | undefined;
+  const user = await requireUser();
+  const row = ownPage(getDb(), user.id, id);
   if (!row) return { error: "Страница не найдена" };
   return { page: rowToPage(row) };
 }
 
 export async function createPage(): Promise<ActionResult> {
+  const user = await requireUser();
   const db = getDb();
   const id = newId();
   db.prepare(
-    "INSERT INTO pages (id, title) VALUES (?, 'Новая страница')",
-  ).run(id);
+    "INSERT INTO pages (id, title, user_id) VALUES (?, 'Новая страница', ?)",
+  ).run(id, user.id);
   revalidatePath("/dashboard");
   return { id };
 }
 
 export async function savePage(input: SavePageInput): Promise<ActionResult> {
+  const user = await requireUser();
   const db = getDb();
   const slug = input.slug || slugify(input.title);
   const blocksJson = JSON.stringify(input.blocks ?? []);
@@ -69,15 +77,15 @@ export async function savePage(input: SavePageInput): Promise<ActionResult> {
   if (pageId) {
     const res = db
       .prepare(
-        "UPDATE pages SET title = ?, slug = ?, description = ?, blocks = ?, updated_at = ? WHERE id = ?",
+        "UPDATE pages SET title = ?, slug = ?, description = ?, blocks = ?, updated_at = ? WHERE id = ? AND user_id = ?",
       )
-      .run(input.title, slug, input.description, blocksJson, now, pageId);
+      .run(input.title, slug, input.description, blocksJson, now, pageId, user.id);
     if (res.changes === 0) return { error: "Страница не найдена" };
   } else {
     pageId = newId();
     db.prepare(
-      "INSERT INTO pages (id, title, slug, description, blocks, updated_at) VALUES (?, ?, ?, ?, ?, ?)",
-    ).run(pageId, input.title, slug, input.description, blocksJson, now);
+      "INSERT INTO pages (id, title, slug, description, blocks, updated_at, user_id) VALUES (?, ?, ?, ?, ?, ?, ?)",
+    ).run(pageId, input.title, slug, input.description, blocksJson, now, user.id);
   }
 
   // Версия для истории изменений (пропускаем, если содержимое не изменилось).
@@ -96,12 +104,11 @@ export async function savePage(input: SavePageInput): Promise<ActionResult> {
 }
 
 export async function publishPage(pageId: string): Promise<ActionResult> {
-  const db = getDb();
-  const row = db
-    .prepare("SELECT * FROM pages WHERE id = ?")
-    .get(pageId) as unknown as PageRow | undefined;
+  const user = await requireUser();
+  const row = ownPage(getDb(), user.id, pageId);
   if (!row) return { error: "Страница не найдена" };
 
+  const db = getDb();
   const slug = row.slug || slugify(row.title);
   const now = new Date().toISOString();
 
@@ -126,6 +133,9 @@ export async function publishPage(pageId: string): Promise<ActionResult> {
 }
 
 export async function unpublishPage(pageId: string): Promise<ActionResult> {
+  const user = await requireUser();
+  if (!ownPage(getDb(), user.id, pageId)) return { error: "Страница не найдена" };
+
   const db = getDb();
   db.prepare("DELETE FROM published_pages WHERE page_id = ?").run(pageId);
   db.prepare("UPDATE pages SET published = 0 WHERE id = ?").run(pageId);
@@ -134,6 +144,9 @@ export async function unpublishPage(pageId: string): Promise<ActionResult> {
 }
 
 export async function deletePage(pageId: string): Promise<ActionResult> {
+  const user = await requireUser();
+  if (!ownPage(getDb(), user.id, pageId)) return { error: "Страница не найдена" };
+
   const db = getDb();
   db.prepare("DELETE FROM published_pages WHERE page_id = ?").run(pageId);
   db.prepare("DELETE FROM page_versions WHERE page_id = ?").run(pageId);
@@ -151,8 +164,10 @@ export interface PageVersion {
 export async function listVersions(
   pageId: string,
 ): Promise<ActionResult & { versions?: PageVersion[] }> {
-  const db = getDb();
-  const rows = db
+  const user = await requireUser();
+  if (!ownPage(getDb(), user.id, pageId)) return { error: "Страница не найдена" };
+
+  const rows = getDb()
     .prepare(
       "SELECT id, title, created_at FROM page_versions WHERE page_id = ? ORDER BY created_at DESC, rowid DESC LIMIT 50",
     )
@@ -165,10 +180,15 @@ export async function getVersion(
 ): Promise<
   ActionResult & { version?: { title: string; blocks: BlockInstance[] } }
 > {
+  const user = await requireUser();
   const db = getDb();
   const row = db
-    .prepare("SELECT title, blocks FROM page_versions WHERE id = ?")
-    .get(versionId) as unknown as
+    .prepare(
+      `SELECT v.title, v.blocks FROM page_versions v
+       JOIN pages p ON p.id = v.page_id
+       WHERE v.id = ? AND p.user_id = ?`,
+    )
+    .get(versionId, user.id) as unknown as
     | { title: string; blocks: string }
     | undefined;
   if (!row) return { error: "Версия не найдена" };

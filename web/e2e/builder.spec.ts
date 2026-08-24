@@ -1,8 +1,14 @@
 import { expect, test } from "@playwright/test";
 
-test("полный сценарий: редактор → автосохранение → публикация", async ({ page }) => {
+test("полный сценарий: регистрация → редактор → публикация", async ({ page }) => {
+  // 0. Регистрация (редактор защищён авторизацией)
+  await page.goto("/signup");
+  await page.getByPlaceholder("you@example.com").fill("e2e@example.com");
+  await page.getByPlaceholder("••••••••").fill("password123");
+  await page.getByRole("button", { name: "Создать аккаунт" }).click();
+  await expect(page).toHaveURL("/");
+
   // 1. Редактор открывается с пустым состоянием
-  await page.goto("/");
   await expect(page.getByText("Страница пуста")).toBeVisible();
 
   // 2. Задаём название страницы

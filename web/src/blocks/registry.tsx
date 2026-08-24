@@ -1,20 +1,26 @@
 import type { LucideIcon } from "lucide-react";
 import {
+  BarChart3,
   Columns2,
   CreditCard,
   HelpCircle,
   Images,
   LayoutGrid,
+  ListOrdered,
+  Mail,
   Megaphone,
+  MessageSquareQuote,
   PanelBottom,
   PanelTop,
   Sparkles,
   Type,
+  Users,
 } from "lucide-react";
 import type { BlockDefinition } from "./types";
 import type { BlockRenderProps } from "./components/common";
 import { blockDefinitions } from "./definitions";
 import {
+  ContactBlock,
   CtaBlock,
   FaqBlock,
   FeaturesBlock,
@@ -23,6 +29,10 @@ import {
   HeaderBlock,
   HeroBlock,
   PricingBlock,
+  StatsBlock,
+  StepsBlock,
+  TeamBlock,
+  TestimonialsBlock,
   TextBlock,
   TextImageBlock,
 } from "./components/blocks";
@@ -44,6 +54,11 @@ const renderMap: Record<string, (props: BlockRenderProps) => React.ReactNode> = 
   faq: FaqBlock,
   cta: CtaBlock,
   footer: FooterBlock,
+  stats: StatsBlock,
+  testimonials: TestimonialsBlock,
+  team: TeamBlock,
+  steps: StepsBlock,
+  contact: ContactBlock,
 };
 
 const iconMap: Record<string, LucideIcon> = {
@@ -57,6 +72,11 @@ const iconMap: Record<string, LucideIcon> = {
   faq: HelpCircle,
   cta: Megaphone,
   footer: PanelBottom,
+  stats: BarChart3,
+  testimonials: MessageSquareQuote,
+  team: Users,
+  steps: ListOrdered,
+  contact: Mail,
 };
 
 export const blockRegistry: Record<string, RegisteredBlock> = Object.fromEntries(
