@@ -33,17 +33,22 @@ function ToolButton({
   title,
   onClick,
   children,
+  danger,
 }: {
   title: string;
   onClick: (e: React.MouseEvent) => void;
   children: ReactNode;
+  danger?: boolean;
 }) {
   return (
     <button
       type="button"
       title={title}
       onClick={onClick}
-      className="rounded p-1 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-neutral-700"
+      className={cn(
+        "rounded-md p-1.5 text-neutral-400 transition-colors",
+        danger ? "hover:bg-red-50 hover:text-red-600" : "hover:bg-neutral-100 hover:text-neutral-700",
+      )}
     >
       {children}
     </button>
@@ -90,30 +95,35 @@ function BlockItem({ block }: { block: BlockInstance }) {
       />
 
       {visible && (
-        <div className="absolute -top-3.5 right-3 z-30 flex items-center gap-0.5 rounded-lg border border-neutral-200 bg-white p-0.5 shadow-md">
-          <ToolButton title="Выше" onClick={(e) => { e.stopPropagation(); moveBlockBy(block.id, -1); }}>
-            <ArrowUp className="h-3.5 w-3.5" />
-          </ToolButton>
-          <ToolButton title="Ниже" onClick={(e) => { e.stopPropagation(); moveBlockBy(block.id, 1); }}>
-            <ArrowDown className="h-3.5 w-3.5" />
-          </ToolButton>
-          <ToolButton title="Дублировать" onClick={(e) => { e.stopPropagation(); duplicateBlock(block.id); }}>
-            <Copy className="h-3.5 w-3.5" />
-          </ToolButton>
-          <ToolButton title="Вставить блок после" onClick={(e) => { e.stopPropagation(); setPickerOpen((v) => !v); }}>
-            <Plus className="h-3.5 w-3.5" />
-          </ToolButton>
-          <ToolButton title="Удалить" onClick={(e) => { e.stopPropagation(); removeBlock(block.id); }}>
-            <Trash2 className="h-3.5 w-3.5" />
-          </ToolButton>
-          <div
-            {...attributes}
-            {...listeners}
-            className="cursor-grab touch-none p-1 text-neutral-400 hover:text-neutral-600 active:cursor-grabbing"
-          >
-            <GripVertical className="h-3.5 w-3.5" />
+        <>
+          <div className="pointer-events-none absolute -top-3.5 left-3 z-30 max-w-[55%] truncate rounded-md bg-neutral-800 px-2 py-0.5 text-[11px] font-medium text-white shadow">
+            {reg.definition.name}
           </div>
-        </div>
+          <div className="absolute -top-3.5 right-3 z-30 flex items-center gap-0.5 rounded-lg border border-neutral-200 bg-white p-1 shadow-md">
+            <ToolButton title="Выше" onClick={(e) => { e.stopPropagation(); moveBlockBy(block.id, -1); }}>
+              <ArrowUp className="h-4 w-4" />
+            </ToolButton>
+            <ToolButton title="Ниже" onClick={(e) => { e.stopPropagation(); moveBlockBy(block.id, 1); }}>
+              <ArrowDown className="h-4 w-4" />
+            </ToolButton>
+            <ToolButton title="Дублировать" onClick={(e) => { e.stopPropagation(); duplicateBlock(block.id); }}>
+              <Copy className="h-4 w-4" />
+            </ToolButton>
+            <ToolButton title="Вставить блок после" onClick={(e) => { e.stopPropagation(); setPickerOpen((v) => !v); }}>
+              <Plus className="h-4 w-4" />
+            </ToolButton>
+            <ToolButton danger title="Удалить" onClick={(e) => { e.stopPropagation(); removeBlock(block.id); }}>
+              <Trash2 className="h-4 w-4" />
+            </ToolButton>
+            <div
+              {...attributes}
+              {...listeners}
+              className="cursor-grab touch-none p-1.5 text-neutral-400 hover:text-neutral-600 active:cursor-grabbing"
+            >
+              <GripVertical className="h-4 w-4" />
+            </div>
+          </div>
+        </>
       )}
 
       {pickerOpen && (

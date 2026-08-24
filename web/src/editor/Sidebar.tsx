@@ -16,8 +16,11 @@ export function Sidebar() {
       <div className="flex-1 overflow-y-auto p-3">
         <BlockPicker onPick={(type) => addBlock(type)} columns={2} />
       </div>
-      <div className="border-t border-neutral-200 p-3 text-xs text-neutral-400">
-        Перетаскивайте блоки на холсте, чтобы менять порядок.
+      <div className="space-y-1 border-t border-neutral-200 p-3 text-xs text-neutral-400">
+        <p>Перетаскивайте блоки на холсте, чтобы менять порядок.</p>
+        <p className="text-neutral-300">
+          ⌘Z — отмена · ⌘D — дублировать · Delete — удалить · Esc — снять выделение
+        </p>
       </div>
     </aside>
   );

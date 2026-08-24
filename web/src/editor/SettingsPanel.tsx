@@ -1,37 +1,33 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { X } from "lucide-react";
 import { getBlockDefinition } from "@/blocks/registry";
-import { cn } from "@/lib/utils";
+import { slugify, cn } from "@/lib/utils";
 import { useEditorStore } from "./store";
 import { FieldEditor } from "./FieldEditor";
 
 type Tab = "content" | "style";
 
-export function SettingsPanel() {
-  const selectedId = useEditorStore((s) => s.selectedId);
-  const block = useEditorStore((s) => s.page.blocks.find((b) => b.id === s.selectedId));
+const inputCls =
+  "w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20";
+
+const labelCls = "block text-xs font-medium text-neutral-500";
+
+/** Настройки выбранного блока: вкладки «Контент» / «Стиль». */
+function BlockSettings({ blockId }: { blockId: string }) {
+  const block = useEditorStore((s) => s.page.blocks.find((b) => b.id === blockId));
   const select = useEditorStore((s) => s.select);
   const updateProps = useEditorStore((s) => s.updateProps);
-
   const [tab, setTab] = useState<Tab>("content");
 
-  if (!block) {
-    return (
-      <aside className="hidden w-80 shrink-0 border-l border-neutral-200 bg-white lg:block">
-        <div className="p-4 text-sm text-neutral-400">
-          Выберите блок, чтобы изменить его содержимое и стили.
-        </div>
-      </aside>
-    );
-  }
+  if (!block) return null;
 
   const def = getBlockDefinition(block.type);
   const fields = (def?.fields ?? []).filter((f) => (f.group ?? "content") === tab);
 
   return (
-    <aside className="flex w-80 shrink-0 flex-col border-l border-neutral-200 bg-white">
+    <>
       <header className="flex items-center justify-between border-b border-neutral-200 px-4 py-3">
         <span className="text-sm font-semibold text-neutral-800">{def?.name}</span>
         <button
@@ -75,6 +71,96 @@ export function SettingsPanel() {
           ))
         )}
       </div>
-    </aside>
+    </>
+  );
+}
+
+/** Настройки страницы (SEO): название, slug, описание. */
+function PageSettings() {
+  const page = useEditorStore((s) => s.page);
+  const updatePageMeta = useEditorStore((s) => s.updatePageMeta);
+  const slugTouched = useRef(false);
+
+  return (
+    <div className="flex h-full flex-col">
+      <header className="border-b border-neutral-200 px-4 py-3">
+        <h2 className="text-sm font-semibold text-neutral-800">Настройки страницы</h2>
+      </header>
+
+      <div className="flex-1 space-y-5 overflow-y-auto p-4">
+        <div className="space-y-1.5">
+          <label className={labelCls}>Название страницы</label>
+          <input
+            className={inputCls}
+            value={page.title}
+            onChange={(e) => {
+              const title = e.target.value;
+              updatePageMeta({
+                title,
+                slug: slugTouched.current ? page.slug : slugify(title),
+              });
+            }}
+          />
+        </div>
+
+        <div className="space-y-1.5">
+          <label className={labelCls}>Ссылка (slug)</label>
+          <div className="flex items-center gap-1.5">
+            <span className="shrink-0 rounded-lg bg-neutral-100 px-2 py-2 text-sm text-neutral-400">
+              /p/
+            </span>
+            <input
+              className={inputCls}
+              value={page.slug}
+              onChange={(e) => {
+                slugTouched.current = true;
+                updatePageMeta({ slug: slugify(e.target.value) });
+              }}
+              placeholder="moja-stranica"
+            />
+          </div>
+          <p className="text-xs text-neutral-400">
+            Адрес опубликованной страницы. Генерируется из названия автоматически.
+          </p>
+        </div>
+
+        <div className="space-y-1.5">
+          <label className={labelCls}>Описание (SEO)</label>
+          <textarea
+            className={cn(inputCls, "min-h-24 resize-y")}
+            value={page.description}
+            onChange={(e) => updatePageMeta({ description: e.target.value })}
+            placeholder="Краткое описание для поисковых систем"
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function SettingsPanel() {
+  const selectedId = useEditorStore((s) => s.selectedId);
+  const select = useEditorStore((s) => s.select);
+
+  return (
+    <>
+      {/* Десктоп: боковая панель справа */}
+      <aside className="hidden w-80 shrink-0 border-l border-neutral-200 bg-white lg:flex lg:flex-col">
+        {selectedId ? <BlockSettings blockId={selectedId} /> : <PageSettings />}
+      </aside>
+
+      {/* Мобильные: нижний лист с настройками выбранного блока */}
+      {selectedId && (
+        <div className="lg:hidden">
+          <div
+            className="fixed inset-0 z-40 bg-neutral-950/40"
+            onClick={() => select(null)}
+          />
+          <div className="fixed inset-x-0 bottom-0 z-50 flex max-h-[75vh] flex-col overflow-hidden rounded-t-2xl bg-white shadow-2xl">
+            <BlockSettings blockId={selectedId} />
+          </div>
+        </div>
+      )}
+    </>
   );
 }
