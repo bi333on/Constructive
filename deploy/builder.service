@@ -1,6 +1,7 @@
 [Unit]
 Description=Constructive — конструктор сайтов (Next.js)
-After=network.target
+After=network-online.target
+Wants=network-online.target
 
 [Service]
 Type=simple
@@ -8,9 +9,7 @@ User=builder
 Group=builder
 WorkingDirectory=/opt/builder/web
 Environment=NODE_ENV=production
-Environment=PORT=3000
-Environment=HOSTNAME=127.0.0.1
-ExecStart=/usr/bin/node /opt/builder/web/node_modules/next/dist/bin/next start
+ExecStart=/usr/bin/node /opt/builder/web/node_modules/next/dist/bin/next start -H 127.0.0.1 -p 3000
 Restart=always
 RestartSec=5
 TimeoutStopSec=20
