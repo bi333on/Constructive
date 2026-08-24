@@ -17,10 +17,14 @@ export async function proxy(request: NextRequest) {
     /^\d{1,3}(\.\d{1,3}){3}$/.test(host);
 
   if (!isMain && !isLocal) {
-    // Реврайт относительным путём (без схемы/хоста), чтобы Next.js не пытался
-    // проксировать по https во внутренний http-сервер.
-    const path = request.nextUrl.pathname === "/" ? "" : request.nextUrl.pathname;
-    return NextResponse.rewrite(`/site/${host}${path}`);
+    // Реврайт на внутренний маршрут /site/<host>. URL строится из request.nextUrl,
+    // чтобы origin совпал с initUrl и Next.js сделал внутренний реврайт
+    // (а не внешний прокси, который падает с EPROTO за reverse-proxy).
+    const url = request.nextUrl.clone();
+    url.pathname = `/site/${host}${url.pathname === "/" ? "" : url.pathname}`;
+    url.search = "";
+    url.hash = "";
+    return NextResponse.rewrite(url);
   }
 
   return NextResponse.next({ request });

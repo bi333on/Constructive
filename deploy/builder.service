@@ -9,7 +9,9 @@ User=builder
 Group=builder
 WorkingDirectory=/opt/builder/web
 Environment=NODE_ENV=production
-ExecStart=/usr/bin/node /opt/builder/web/node_modules/next/dist/bin/next start -H 127.0.0.1 -p 3000
+# Важно: именно -H localhost (не 127.0.0.1) — иначе origin реврайта в middleware
+# не совпадёт с initUrl и поддомены падают с EPROTO за reverse-proxy.
+ExecStart=/usr/bin/node /opt/builder/web/node_modules/next/dist/bin/next start -H localhost -p 3000
 Restart=always
 RestartSec=5
 TimeoutStopSec=20
