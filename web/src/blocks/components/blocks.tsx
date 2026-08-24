@@ -19,14 +19,14 @@ export function HeaderBlock({ props, interactive }: BlockRenderProps) {
           {str(props, "logo", "Логотип")}
         </Inline>
         {showButton && (
-          <Inline fieldKeys={["buttonText", "buttonUrl", "buttonColor", "buttonTextColor"]}>
+          <Inline kind="button" fieldKeys={["buttonText", "buttonUrl", "buttonColor", "buttonTextColor"]}>
             <BlockButton
               bg={col(props, "buttonColor", "#2563eb")}
               fg={col(props, "buttonTextColor", "#ffffff")}
               href={str(props, "buttonUrl")}
               interactive={interactive}
             >
-              {str(props, "buttonText", "Начать")}
+              <Inline kind="text" fieldKeys={["buttonText"]}>{str(props, "buttonText", "Начать")}</Inline>
             </BlockButton>
           </Inline>
         )}
@@ -83,13 +83,13 @@ export function HeroBlock({ props, interactive }: BlockRenderProps) {
             align === "right" && "justify-end",
           )}
         >
-          <Inline fieldKeys={["primaryText", "primaryUrl", "accent"]}>
+          <Inline kind="button" fieldKeys={["primaryText", "primaryUrl", "accent"]}>
             <BlockButton bg={accent} fg="#ffffff" href={str(props, "primaryUrl")} interactive={interactive}>
-              {str(props, "primaryText", "Начать")}
+              <Inline kind="text" fieldKeys={["primaryText"]}>{str(props, "primaryText", "Начать")}</Inline>
             </BlockButton>
           </Inline>
           {showSecondary && (
-            <Inline fieldKeys={["secondaryText", "secondaryUrl"]}>
+            <Inline kind="button" fieldKeys={["secondaryText", "secondaryUrl"]}>
               <BlockButton
                 bg="transparent"
                 fg={textColor}
@@ -97,13 +97,13 @@ export function HeroBlock({ props, interactive }: BlockRenderProps) {
                 href={str(props, "secondaryUrl")}
                 interactive={interactive}
               >
-                {str(props, "secondaryText", "Подробнее")}
+                <Inline kind="text" fieldKeys={["secondaryText"]}>{str(props, "secondaryText", "Подробнее")}</Inline>
               </BlockButton>
             </Inline>
           )}
         </div>
         {showImage && (
-          <Inline as="div" fieldKeys={["image"]} className="mt-10">
+          <Inline as="div" kind="image" fieldKeys={["image"]} className="mt-10">
             <BlockImage src={str(props, "image")} alt={str(props, "title")} aspect="video" />
           </Inline>
         )}
@@ -167,7 +167,7 @@ export function TextImageBlock({ props }: BlockRenderProps) {
             {str(props, "text")}
           </Inline>
         </div>
-        <Inline as="div" fieldKeys={["image"]} className={cn(reverse && "md:order-1")}>
+        <Inline as="div" kind="image" fieldKeys={["image"]} className={cn(reverse && "md:order-1")}>
           <BlockImage src={str(props, "image")} alt={str(props, "title")} aspect="square" />
         </Inline>
       </Container>
@@ -239,7 +239,7 @@ export function GalleryBlock({ props }: BlockRenderProps) {
             )}
           >
             {images.map(({ i, src }) => (
-              <Inline as="div" key={i} fieldKeys={[`img${i}`]}>
+              <Inline as="div" key={i} kind="image" fieldKeys={[`img${i}`]}>
                 <BlockImage src={src} alt="" aspect="square" />
               </Inline>
             ))}
@@ -301,9 +301,9 @@ export function PricingBlock({ props, interactive }: BlockRenderProps) {
                 ))}
               </Inline>
               <div className="mt-6">
-                <Inline fieldKeys={["buttonText", "buttonUrl", "accent"]}>
+                <Inline kind="button" fieldKeys={["buttonText", "buttonUrl", "accent"]}>
                   <BlockButton bg={accent} fg="#ffffff" href={str(props, "buttonUrl")} interactive={interactive}>
-                    {str(props, "buttonText", "Выбрать")}
+                    <Inline kind="text" fieldKeys={["buttonText"]}>{str(props, "buttonText", "Выбрать")}</Inline>
                   </BlockButton>
                 </Inline>
               </div>
@@ -355,14 +355,14 @@ export function CtaBlock({ props, interactive }: BlockRenderProps) {
           {str(props, "subtitle")}
         </Inline>
         <div className="mt-8">
-          <Inline fieldKeys={["buttonText", "buttonUrl", "buttonColor", "buttonTextColor"]}>
+          <Inline kind="button" fieldKeys={["buttonText", "buttonUrl", "buttonColor", "buttonTextColor"]}>
             <BlockButton
               bg={col(props, "buttonColor", "#ffffff")}
               fg={col(props, "buttonTextColor", "#2563eb")}
               href={str(props, "buttonUrl")}
               interactive={interactive}
             >
-              {str(props, "buttonText", "Связаться")}
+              <Inline kind="text" fieldKeys={["buttonText"]}>{str(props, "buttonText", "Связаться")}</Inline>
             </BlockButton>
           </Inline>
         </div>
@@ -566,9 +566,9 @@ export function ContactBlock({ props, interactive }: BlockRenderProps) {
           ))}
         </div>
         <div className="mt-8">
-          <Inline fieldKeys={["buttonText", "buttonUrl", "accent"]}>
+          <Inline kind="button" fieldKeys={["buttonText", "buttonUrl", "accent"]}>
             <BlockButton bg={accent} fg="#ffffff" href={str(props, "buttonUrl")} interactive={interactive}>
-              {str(props, "buttonText", "Написать нам")}
+              <Inline kind="text" fieldKeys={["buttonText"]}>{str(props, "buttonText", "Написать нам")}</Inline>
             </BlockButton>
           </Inline>
         </div>

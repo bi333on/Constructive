@@ -21,10 +21,10 @@ export function Editor() {
     <div className="flex h-screen flex-col bg-neutral-100 text-neutral-900">
       <Toolbar onPreview={() => setPreviewOpen(true)} />
       <InlineProvider begin={begin}>
+        <InlineToolbar />
         <main className="min-w-0 flex-1 overflow-y-auto">
           <BlockCanvas />
         </main>
-        <InlineToolbar />
       </InlineProvider>
       <PreviewModal open={previewOpen} onClose={() => setPreviewOpen(false)} />
     </div>

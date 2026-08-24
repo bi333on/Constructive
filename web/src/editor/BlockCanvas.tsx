@@ -30,7 +30,7 @@ import {
 import { blockRegistry } from "@/blocks/registry";
 import type { BlockInstance } from "@/blocks/types";
 import { cn } from "@/lib/utils";
-import { useEditorStore, useStyleClipboard } from "./store";
+import { useEditorStore, useInlineStore, useStyleClipboard } from "./store";
 import { BlockPicker } from "./BlockPicker";
 import { BlockSettingsModal } from "./BlockSettingsModal";
 import { InlineBlock } from "./inline";
@@ -230,7 +230,10 @@ export function BlockCanvas() {
     <div
       className="mx-auto w-full max-w-5xl px-4 py-6"
       onClick={(e) => {
-        if (e.target === e.currentTarget) select(null);
+        if (e.target === e.currentTarget) {
+          select(null);
+          useInlineStore.getState().end();
+        }
       }}
     >
       {blocks.length === 0 ? (

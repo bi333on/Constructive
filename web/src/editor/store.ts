@@ -178,21 +178,26 @@ export const useSaveStore = create<SaveState>()((set) => ({
   setStatus: (status) => set({ status }),
 }));
 
+export type InlineKind = "text" | "button" | "image";
+
 export interface InlineEditRequest {
+  key: string;
   blockId: string;
   fieldKeys: string[];
+  kind: InlineKind;
 }
 
 interface InlineEditState {
   edit: InlineEditRequest | null;
-  begin: (blockId: string, fieldKeys: string[]) => void;
+  begin: (blockId: string, fieldKeys: string[], kind: InlineKind) => void;
   end: () => void;
 }
 
-/** Текущий инлайн-редактируемый элемент (узкая панель инструментов). */
+/** Текущий инлайн-редактируемый элемент (панель в шапке редактора). */
 export const useInlineStore = create<InlineEditState>()((set) => ({
   edit: null,
-  begin: (blockId, fieldKeys) => set({ edit: { blockId, fieldKeys } }),
+  begin: (blockId, fieldKeys, kind) =>
+    set({ edit: { key: `${blockId}:${fieldKeys.join(",")}`, blockId, fieldKeys, kind } }),
   end: () => set({ edit: null }),
 }));
 
