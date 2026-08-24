@@ -1,5 +1,14 @@
 # Caddy: автоматический HTTPS + реверс-прокси на Next.js
 # (заполняется install.sh: __DOMAIN__ и __PORT__)
+
+# Глобальные опции: разрешение on-demand TLS через endpoint приложения
+{
+    on_demand_tls {
+        ask http://127.0.0.1:__PORT__/api/caddy/ask
+    }
+}
+
+# Основной домен — приложение (редактор, дашборд)
 __DOMAIN__ {
     reverse_proxy 127.0.0.1:__PORT__
     encode gzip
@@ -7,6 +16,15 @@ __DOMAIN__ {
 
 # Бесплатные поддомены <имя>.__DOMAIN__ (нужна wildcard A-запись *.DOMAIN → IP)
 *.__DOMAIN__ {
+    tls {
+        on_demand
+    }
+    reverse_proxy 127.0.0.1:__PORT__
+    encode gzip
+}
+
+# Собственные домены пользователей (любые другие hostnames)
+https:// {
     tls {
         on_demand
     }
