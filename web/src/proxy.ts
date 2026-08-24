@@ -17,10 +17,10 @@ export async function proxy(request: NextRequest) {
     /^\d{1,3}(\.\d{1,3}){3}$/.test(host);
 
   if (!isMain && !isLocal) {
-    const url = request.nextUrl.clone();
-    url.pathname = `/site/${host}${url.pathname === "/" ? "" : url.pathname}`;
-    url.search = "";
-    return NextResponse.rewrite(url);
+    // Реврайт относительным путём (без схемы/хоста), чтобы Next.js не пытался
+    // проксировать по https во внутренний http-сервер.
+    const path = request.nextUrl.pathname === "/" ? "" : request.nextUrl.pathname;
+    return NextResponse.rewrite(`/site/${host}${path}`);
   }
 
   return NextResponse.next({ request });
