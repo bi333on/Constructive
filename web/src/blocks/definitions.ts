@@ -1,9 +1,9 @@
-import type { BlockDefinition } from "./types";
+import type { BlockDefinition, BlockField } from "./types";
 
 // Схемы блоков. Панель настроек рендерится автоматически из `fields`.
 // Значения по умолчанию живут в `defaultProps` (используются при добавлении блока).
 
-export const blockDefinitions: BlockDefinition[] = [
+const baseDefinitions: BlockDefinition[] = [
   {
     type: "header",
     name: "Шапка (навигация)",
@@ -448,3 +448,20 @@ export const blockDefinitions: BlockDefinition[] = [
     ],
   },
 ];
+
+const visibilityFields: BlockField[] = [
+  { type: "toggle", key: "hideDesktop", label: "Скрыть на ПК", group: "style" },
+  { type: "toggle", key: "hideTablet", label: "Скрыть на планшете", group: "style" },
+  { type: "toggle", key: "hideMobile", label: "Скрыть на телефоне", group: "style" },
+];
+
+export const blockDefinitions: BlockDefinition[] = baseDefinitions.map((def) => ({
+  ...def,
+  defaultProps: {
+    ...def.defaultProps,
+    hideDesktop: false,
+    hideTablet: false,
+    hideMobile: false,
+  },
+  fields: [...def.fields, ...visibilityFields],
+}));

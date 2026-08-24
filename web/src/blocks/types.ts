@@ -120,3 +120,16 @@ export const bool = (props: BlockProps, key: string, def = false): boolean =>
 
 export const col = (props: BlockProps, key: string, def = "#ffffff"): string =>
   (props[key] as string) ?? def;
+
+/** Классы видимости блока по устройствам (для публичного рендера). */
+export function visibilityClasses(props: BlockProps): string {
+  const phone = !bool(props, "hideMobile", false);
+  const tablet = !bool(props, "hideTablet", false);
+  const desktop = !bool(props, "hideDesktop", false);
+  if (phone && tablet && desktop) return "";
+  const cls = ["hidden"];
+  if (phone) cls.push("max-md:block");
+  if (tablet) cls.push("md:max-lg:block");
+  if (desktop) cls.push("lg:block");
+  return cls.join(" ");
+}

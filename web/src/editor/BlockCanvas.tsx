@@ -20,6 +20,7 @@ import {
   ArrowUp,
   ClipboardPaste,
   Copy,
+  EyeOff,
   GripVertical,
   Paintbrush,
   Plus,
@@ -84,6 +85,7 @@ function BlockItem({
     useSortable({ id: block.id });
 
   const reg = blockRegistry[block.type];
+  const hiddenOn = Boolean(block.props.hideMobile || block.props.hideTablet || block.props.hideDesktop);
   const visible = selected || hovered;
 
   return (
@@ -107,8 +109,9 @@ function BlockItem({
 
       {visible && (
         <>
-          <div className="pointer-events-none absolute -top-3.5 left-3 z-30 max-w-[55%] truncate rounded-md bg-neutral-800 px-2 py-0.5 text-[11px] font-medium text-white shadow">
-            {reg.definition.name}
+          <div className="pointer-events-none absolute -top-3.5 left-3 z-30 flex max-w-[55%] items-center gap-1 rounded-md bg-neutral-800 px-2 py-0.5 text-[11px] font-medium text-white shadow">
+            <span className="truncate">{reg.definition.name}</span>
+            {hiddenOn && <EyeOff className="h-3 w-3 shrink-0 text-neutral-300" />}
           </div>
           <div className="absolute -top-3.5 right-3 z-30 flex items-center gap-0.5 rounded-lg border border-neutral-200 bg-white p-1 shadow-md">
             <ToolButton title="Выше" onClick={(e) => { e.stopPropagation(); moveBlockBy(block.id, -1); }}>
