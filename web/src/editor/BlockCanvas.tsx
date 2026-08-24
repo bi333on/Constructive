@@ -21,6 +21,7 @@ import {
   Copy,
   GripVertical,
   Plus,
+  Settings2,
   Trash2,
   X,
 } from "lucide-react";
@@ -29,6 +30,7 @@ import type { BlockInstance } from "@/blocks/types";
 import { cn } from "@/lib/utils";
 import { useEditorStore } from "./store";
 import { BlockPicker } from "./BlockPicker";
+import { BlockSettingsModal } from "./BlockSettingsModal";
 import { InlineBlock } from "./inline";
 
 function ToolButton({
@@ -57,7 +59,13 @@ function ToolButton({
   );
 }
 
-function BlockItem({ block }: { block: BlockInstance }) {
+function BlockItem({
+  block,
+  onOpenSettings,
+}: {
+  block: BlockInstance;
+  onOpenSettings: (id: string) => void;
+}) {
   const selected = useEditorStore((s) => s.selectedId === block.id);
   const hovered = useEditorStore((s) => s.hoveredId === block.id);
 
@@ -106,6 +114,9 @@ function BlockItem({ block }: { block: BlockInstance }) {
             </ToolButton>
             <ToolButton title="Дублировать" onClick={(e) => { e.stopPropagation(); duplicateBlock(block.id); }}>
               <Copy className="h-4 w-4" />
+            </ToolButton>
+            <ToolButton title="Настройки блока" onClick={(e) => { e.stopPropagation(); onOpenSettings(block.id); }}>
+              <Settings2 className="h-4 w-4" />
             </ToolButton>
             <ToolButton danger title="Удалить" onClick={(e) => { e.stopPropagation(); removeBlock(block.id); }}>
               <Trash2 className="h-4 w-4" />
@@ -159,8 +170,8 @@ function EmptyCanvas() {
 
 function InsertDivider({ onInsert }: { onInsert: () => void }) {
   return (
-    <div className="group relative flex h-7 items-center justify-center">
-      <div className="absolute inset-x-0 top-1/2 h-0.5 -translate-y-1/2 rounded-full bg-blue-500 opacity-0 transition-opacity group-hover:opacity-100" />
+    <div className="group relative z-20 -my-4 flex h-8 items-center justify-center">
+      <div className="pointer-events-none absolute inset-x-0 top-1/2 h-0.5 -translate-y-1/2 rounded-full bg-blue-500 opacity-0 transition-opacity group-hover:opacity-100" />
       <button
         type="button"
         title="Добавить блок"
@@ -183,6 +194,7 @@ export function BlockCanvas() {
   const addBlock = useEditorStore((s) => s.addBlock);
 
   const [insertAt, setInsertAt] = useState<number | null>(null);
+  const [settingsId, setSettingsId] = useState<string | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -221,7 +233,7 @@ export function BlockCanvas() {
               {blocks.map((block, i) => (
                 <Fragment key={block.id}>
                   <InsertDivider onInsert={() => setInsertAt(i)} />
-                  <BlockItem block={block} />
+                  <BlockItem block={block} onOpenSettings={setSettingsId} />
                 </Fragment>
               ))}
             </div>
@@ -249,6 +261,10 @@ export function BlockCanvas() {
             </div>
           </aside>
         </>
+      )}
+
+      {settingsId && (
+        <BlockSettingsModal blockId={settingsId} onClose={() => setSettingsId(null)} />
       )}
     </div>
   );

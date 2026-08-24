@@ -1,5 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import {
+  ArrowUpDown,
   BarChart3,
   Columns2,
   CreditCard,
@@ -29,6 +30,7 @@ import {
   HeaderBlock,
   HeroBlock,
   PricingBlock,
+  SpacerBlock,
   StatsBlock,
   StepsBlock,
   TeamBlock,
@@ -59,6 +61,7 @@ const renderMap: Record<string, (props: BlockRenderProps) => React.ReactNode> = 
   team: TeamBlock,
   steps: StepsBlock,
   contact: ContactBlock,
+  spacer: SpacerBlock,
 };
 
 const iconMap: Record<string, LucideIcon> = {
@@ -77,6 +80,7 @@ const iconMap: Record<string, LucideIcon> = {
   team: Users,
   steps: ListOrdered,
   contact: Mail,
+  spacer: ArrowUpDown,
 };
 
 export const blockRegistry: Record<string, RegisteredBlock> = Object.fromEntries(

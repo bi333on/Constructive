@@ -571,3 +571,12 @@ export function ContactBlock({ props, interactive }: BlockRenderProps) {
     </Section>
   );
 }
+
+export function SpacerBlock({ props }: BlockRenderProps) {
+  const height = num(props, "height", 48);
+  return (
+    <Inline as="div" fieldKeys={["height"]} className="w-full" style={{ height }}>
+      {""}
+    </Inline>
+  );
+}

@@ -1,6 +1,7 @@
 "use client";
 
-import { FolderOpen, LogOut, Redo2, Undo2 } from "lucide-react";
+import { useState } from "react";
+import { FolderOpen, LogOut, Redo2, Settings2, Undo2 } from "lucide-react";
 import Link from "next/link";
 import { useStore } from "zustand";
 import { signOut } from "@/app/actions/auth";
@@ -9,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { HistoryButton } from "./HistoryButton";
 import { PublishButton } from "./PublishButton";
 import { TemplatesButton } from "./TemplatesButton";
+import { PageSettingsModal } from "./PageSettingsModal";
 
 export function Toolbar({ onPreview }: { onPreview: () => void }) {
   const title = useEditorStore((s) => s.page.title);
@@ -17,6 +19,7 @@ export function Toolbar({ onPreview }: { onPreview: () => void }) {
 
   const canUndo = useStore(temporalStore, (s) => s.pastStates.length > 0);
   const canRedo = useStore(temporalStore, (s) => s.futureStates.length > 0);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   return (
     <header className="flex h-14 shrink-0 items-center gap-3 border-b border-neutral-200 bg-white px-4">
@@ -46,6 +49,15 @@ export function Toolbar({ onPreview }: { onPreview: () => void }) {
       >
         {saveStatus === "saved" ? "Сохранено" : "Сохранение…"}
       </span>
+
+      <button
+        type="button"
+        title="Настройки страницы"
+        onClick={() => setSettingsOpen(true)}
+        className="rounded-lg p-2 text-neutral-600 transition-colors hover:bg-neutral-100"
+      >
+        <Settings2 className="h-4 w-4" />
+      </button>
 
       <Link
         href="/dashboard"
@@ -104,6 +116,8 @@ export function Toolbar({ onPreview }: { onPreview: () => void }) {
       >
         <LogOut className="h-4 w-4" />
       </button>
+
+      {settingsOpen && <PageSettingsModal onClose={() => setSettingsOpen(false)} />}
     </header>
   );
 }

@@ -30,6 +30,17 @@ export const blockDefinitions: BlockDefinition[] = [
     ],
   },
   {
+    type: "spacer",
+    name: "Пробел (отступ)",
+    category: "Структура",
+    defaultProps: {
+      height: 48,
+    },
+    fields: [
+      { type: "number", key: "height", label: "Высота", unit: "px", min: 0, max: 400, step: 4, group: "content" },
+    ],
+  },
+  {
     type: "hero",
     name: "Обложка (Hero)",
     category: "Структура",
